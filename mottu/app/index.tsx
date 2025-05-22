@@ -14,54 +14,74 @@ import {
 import colors from "../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-
-type Usuario = {
-  nome: string;
-  id: string;
-  funcao: string;
-};
+import { useAuth } from "../context/UserContext";
 
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [id, setId] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
-  const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [funcao, setFuncao] = useState<"Gerente" | "Operador" | "">("");
 
+  const { login } = useAuth();
   const router = useRouter();
-
   const handleLogin = () => {
     if (
       (id === "12345" && senha === "12345") ||
       (id === "54321" && senha === "54321")
     ) {
-      const funcao = id === "12345" ? "Gerente" : "Operador";
+      const userFuncao: "Gerente" | "Operador" =
+        id === "12345" ? "Gerente" : "Operador";
+
+      setFuncao(userFuncao);
+
+      const usuario = {
+        nome: "Gustavo Camargo",
+        id,
+        funcao: userFuncao,
+      };
+
+      login(usuario);
+
+      // 1º: Mostrar o círculo por 2 segundos
       setLoading(true);
       setTimeout(() => {
         setLoading(false);
-        setUsuario({
-          nome: "Gustavo Camargo",
-          id,
-          funcao,
-        });
-
-        // Aguarda 3s e redireciona para /motos
+        // 2º: Mostrar modal por 3 segundos
+        setModalVisible(true);
         setTimeout(() => {
-          setUsuario(null);
+          setModalVisible(false);
           router.replace("/(tabs)/motos");
-        }, 3000);
-      }, 2000);
+        }, 2000);
+      }, 1500);
     } else {
       Alert.alert("Erro", "ID ou senha inválidos");
     }
   };
+
+  const spinAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.timing(spinAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+        easing: Easing.linear,
+      })
+    );
+
+    animation.start();
+
+    return () => animation.stop(); // boa prática para limpar
+  }, [spinAnim]);
 
   return (
     <View style={styles.fullscreen}>
       <View style={styles.loginContainer}>
         <Image
           source={require("../assets/images/mottu-logo.png")}
-          style={{ width: 120, height: 120, marginTop: 2 }}
+          style={{ width: 120, height: 120, marginTop: 50 }}
         />
         <View style={styles.whiteContainer}>
           <Text style={styles.title}>Log In</Text>
@@ -103,67 +123,44 @@ export default function LoginScreen() {
           </Text>
         </View>
       </View>
-
-      {/* Tela de carregamento sobreposta */}
       {loading && (
         <View style={styles.loadingOverlay}>
-          <RotatingLoader />
+          <Animated.View
+            style={[
+              styles.spinner,
+              {
+                transform: [
+                  {
+                    rotate: spinAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ["0deg", "360deg"],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          />
         </View>
       )}
 
-      {/* Pop-up de boas-vindas */}
       <Modal
         transparent
-        visible={usuario !== null}
+        visible={modalVisible}
         animationType="fade"
         onRequestClose={() => {}}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.bemVindo}>
-              Seja bem-vindo, {usuario?.nome}!
+              Seja bem-vindo, Gustavo Camargo!
             </Text>
             <Text style={styles.info}>
-              {usuario?.funcao} | ID: {usuario?.id}
+              {funcao} | ID: {id}
             </Text>
           </View>
         </View>
       </Modal>
     </View>
-  );
-}
-
-function RotatingLoader() {
-  const rotateAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.timing(rotateAnim, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-        easing: Easing.linear,
-      })
-    ).start();
-  }, [rotateAnim]);
-
-  const spin = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
-  });
-
-  return (
-    <Animated.View
-      style={{
-        width: 80,
-        height: 80,
-        borderWidth: 8,
-        borderRadius: 40,
-        borderColor: "#333",
-        borderTopColor: colors.verde,
-        transform: [{ rotate: spin }],
-      }}
-    />
   );
 }
 
@@ -181,7 +178,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 170,
     borderTopLeftRadius: 170,
     width: "100%",
-    height: "85%",
+    height: "81%",
     marginTop: "auto",
     alignItems: "center",
     justifyContent: "center",
@@ -255,7 +252,7 @@ const styles = StyleSheet.create({
   info: {
     fontSize: 16,
     color: colors.preto,
-    marginBottom: 16,
+    marginBottom: 14,
     fontWeight: "bold",
   },
   passwordContainer: {
@@ -276,5 +273,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 16,
     top: "35%",
+  },
+  spinner: {
+    width: 60,
+    height: 60,
+    borderWidth: 6,
+    borderColor: "#333",
+    borderTopColor: colors.verde,
+    borderRadius: 30,
+    marginBottom: 20,
   },
 });

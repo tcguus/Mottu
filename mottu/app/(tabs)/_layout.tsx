@@ -72,7 +72,13 @@ export default function TabLayout() {
   );
 }
 
-function IconWrapper({ children, focused }: { children: React.ReactNode; focused: boolean }) {
+function IconWrapper({
+  children,
+  focused,
+}: {
+  children: React.ReactNode;
+  focused: boolean;
+}) {
   return (
     <View
       style={{
