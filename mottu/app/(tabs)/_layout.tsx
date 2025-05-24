@@ -38,6 +38,16 @@ export default function TabLayout() {
           ),
         }}
       />
+        <Tabs.Screen
+          name="manutencao"
+          options={{
+            tabBarIcon: ({ focused }: { focused: boolean }) => (
+              <IconWrapper focused={focused}>
+                <ManutencaoIcon color="#FFF" />
+              </IconWrapper>
+            ),
+          }}
+        />
       <Tabs.Screen
         name="patio"
         options={{
@@ -54,16 +64,6 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }: { focused: boolean }) => (
             <IconWrapper focused={focused}>
               <LocalizacaoIcon color="#FFF" />
-            </IconWrapper>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="manutencao"
-        options={{
-          tabBarIcon: ({ focused }: { focused: boolean }) => (
-            <IconWrapper focused={focused}>
-              <ManutencaoIcon color="#FFF" />
             </IconWrapper>
           ),
         }}

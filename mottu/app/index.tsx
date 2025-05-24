@@ -23,7 +23,6 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [funcao, setFuncao] = useState<"Gerente" | "Operador" | "">("");
-
   const { login } = useAuth();
   const router = useRouter();
   const handleLogin = () => {
@@ -33,7 +32,6 @@ export default function LoginScreen() {
     ) {
       const userFuncao: "Gerente" | "Operador" =
         id === "12345" ? "Gerente" : "Operador";
-
       setFuncao(userFuncao);
 
       const usuario = {
@@ -43,12 +41,9 @@ export default function LoginScreen() {
       };
 
       login(usuario);
-
-      // 1º: Mostrar o círculo por 2 segundos
       setLoading(true);
       setTimeout(() => {
         setLoading(false);
-        // 2º: Mostrar modal por 3 segundos
         setModalVisible(true);
         setTimeout(() => {
           setModalVisible(false);
@@ -73,7 +68,7 @@ export default function LoginScreen() {
 
     animation.start();
 
-    return () => animation.stop(); // boa prática para limpar
+    return () => animation.stop();
   }, [spinAnim]);
 
   return (
@@ -85,7 +80,6 @@ export default function LoginScreen() {
         />
         <View style={styles.whiteContainer}>
           <Text style={styles.title}>Log In</Text>
-
           <TextInput
             placeholder="Digite seu ID"
             placeholderTextColor={colors.verde}
@@ -113,11 +107,9 @@ export default function LoginScreen() {
               />
             </TouchableOpacity>
           </View>
-
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Entrar</Text>
           </TouchableOpacity>
-
           <Text style={styles.rodape}>
             © 2025 Mottu - Todos os direitos reservados
           </Text>
