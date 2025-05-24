@@ -84,18 +84,40 @@ export default function CadastroMoto() {
     return (
       <View style={styles.container}>
         <Header title="Cadastre uma moto" showBackButton={true} />
-        <TextInput
-          style={styles.search}
-          placeholder="Procurar por placa..."
-          value={search}
-          onChangeText={setSearch}
-        />
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Procurar por placa..."
+            placeholderTextColor="#888"
+            value={search}
+            onChangeText={setSearch}
+          />
+          <Ionicons
+            name="search-outline"
+            size={22}
+            color={colors.verde}
+            style={styles.searchIcon}
+          />
+        </View>
+
         <Text style={styles.title}>Motos cadastradas</Text>
         <FlatList
           data={motosFiltradas}
           keyExtractor={(item, index) => `${item.placa}-${index}`}
           style={{ width: "90%", maxHeight: "72%" }}
           contentContainerStyle={{ paddingBottom: 100 }}
+          ListEmptyComponent={() => (
+            <Text
+              style={{
+                marginTop: 16,
+                color: "#888",
+                fontWeight: "bold",
+                textAlign: "center",
+              }}
+            >
+              Nenhuma moto encontrada
+            </Text>
+          )}
           renderItem={({ item, index }) => (
             <View style={styles.card}>
               <View style={styles.cardHeader}>
@@ -106,7 +128,7 @@ export default function CadastroMoto() {
                     setConfirmVisible(true);
                   }}
                 >
-                  <Ionicons name="trash" size={22} color={"#999"} />
+                  <Ionicons name="trash" size={22} color="#999" />
                 </TouchableOpacity>
               </View>
               <View style={styles.infos}>
@@ -212,8 +234,7 @@ export default function CadastroMoto() {
                 resizeMode="contain"
               />
               <View style={styles.inputt}>
-                {" "}
-                <Text style={styles.label}>Placa</Text>{" "}
+                <Text style={styles.label}>Placa</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="ABC-1234"
@@ -230,11 +251,10 @@ export default function CadastroMoto() {
                     }
                     setPlaca(formatted);
                   }}
-                />{" "}
-              </View>{" "}
+                />
+              </View>
               <View style={styles.inputt}>
-                {" "}
-                <Text style={styles.label}>Ano</Text>{" "}
+                <Text style={styles.label}>Ano</Text>
                 <TextInput
                   style={styles.input}
                   maxLength={4}
@@ -242,11 +262,10 @@ export default function CadastroMoto() {
                   placeholderTextColor={"#888"}
                   value={chassi}
                   onChangeText={setChassi}
-                />{" "}
-              </View>{" "}
+                />
+              </View>
               <View style={styles.inputt}>
-                {" "}
-                <Text style={styles.label}>Chassi (VIN)</Text>{" "}
+                <Text style={styles.label}>Chassi (VIN)</Text>
                 <TextInput
                   style={styles.input}
                   maxLength={17}
@@ -254,8 +273,8 @@ export default function CadastroMoto() {
                   placeholderTextColor={"#888"}
                   value={ano}
                   onChangeText={setAno}
-                />{" "}
-              </View>{" "}
+                />
+              </View>
               <TouchableOpacity
                 onPress={adicionarMoto}
                 style={styles.botaoCadastrar}
@@ -300,10 +319,8 @@ export default function CadastroMoto() {
         resizeMode="contain"
       />
       <View style={styles.inputGroup}>
-        {" "}
         <View style={styles.inputt}>
-          {" "}
-          <Text style={styles.label}>Placa</Text>{" "}
+          <Text style={styles.label}>Placa</Text>
           <TextInput
             style={styles.input}
             placeholder="ABC-1234"
@@ -317,11 +334,10 @@ export default function CadastroMoto() {
               }
               setPlaca(formatted);
             }}
-          />{" "}
-        </View>{" "}
+          />
+        </View>
         <View style={styles.inputt}>
-          {" "}
-          <Text style={styles.label}>Ano</Text>{" "}
+          <Text style={styles.label}>Ano</Text>
           <TextInput
             style={styles.input}
             maxLength={4}
@@ -329,11 +345,10 @@ export default function CadastroMoto() {
             placeholderTextColor={"#888"}
             value={chassi}
             onChangeText={setChassi}
-          />{" "}
-        </View>{" "}
+          />
+        </View>
         <View style={styles.inputt}>
-          {" "}
-          <Text style={styles.label}>Chassi (VIN)</Text>{" "}
+          <Text style={styles.label}>Chassi (VIN)</Text>
           <TextInput
             style={styles.input}
             maxLength={17}
@@ -341,8 +356,8 @@ export default function CadastroMoto() {
             placeholderTextColor={"#888"}
             value={ano}
             onChangeText={setAno}
-          />{" "}
-        </View>{" "}
+          />
+        </View>
       </View>
       <TouchableOpacity onPress={adicionarMoto} style={styles.botaoCadastrar}>
         <Text style={styles.botaoTexto}>Cadastrar</Text>
@@ -436,15 +451,25 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 18,
   },
-  search: {
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: colors.branco,
     borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
     borderWidth: 2,
     borderColor: colors.verde,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     width: "60%",
     marginTop: 24,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: "#000",
+  },
+  searchIcon: {
+    marginLeft: 8,
   },
   card: {
     borderWidth: 3,
