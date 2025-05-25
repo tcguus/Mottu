@@ -138,11 +138,11 @@ export default function CadastroMoto() {
                     <Text style={styles.inputInfo}>{item.placa}</Text>
                   </View>
                   <View style={styles.desc}>
-                    <Text style={styles.labelInfo}>Ano</Text>
+                    <Text style={styles.labelInfo}>Chassi (VIN)</Text>
                     <Text style={styles.inputInfo}>{item.ano}</Text>
                   </View>
                   <View style={styles.desc}>
-                    <Text style={styles.labelInfo}>Chassi (VIN)</Text>
+                    <Text style={styles.labelInfo}>Ano</Text>
                     <Text style={styles.inputInfo}>{item.chassi}</Text>
                   </View>
                 </View>

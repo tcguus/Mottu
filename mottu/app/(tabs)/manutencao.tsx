@@ -1,4 +1,3 @@
-// manutenção.tsx
 import React, { useState, useCallback } from "react";
 import {
   View,
@@ -36,15 +35,11 @@ export default function ManutencaoScreen() {
   const [descricao, setDescricao] = useState("");
   const [data, setData] = useState(new Date());
   const [mostrarData, setMostrarData] = useState(false);
-
-  // Dropdown - moto
   const [openMoto, setOpenMoto] = useState(false);
   const [motoSelecionada, setMotoSelecionada] = useState<string | null>(null);
   const [listaMotos, setListaMotos] = useState<
     { label: string; value: string }[]
   >([]);
-
-  // Dropdown - tipo
   const [openTipo, setOpenTipo] = useState(false);
   const [tipo, setTipo] = useState<string | null>(null);
   const [tipos, setTipos] = useState([
@@ -56,8 +51,6 @@ export default function ManutencaoScreen() {
     { label: "Elétrica", value: "Elétrica" },
     { label: "Outros", value: "Outros" },
   ]);
-
-  // Modal de detalhes
   const [modalVisible, setModalVisible] = useState(false);
   const [manutencaoSelecionada, setManutencaoSelecionada] =
     useState<Manutencao | null>(null);
@@ -195,6 +188,7 @@ export default function ManutencaoScreen() {
               <Text style={styles.botaoTexto}>Cadastrar</Text>
             </TouchableOpacity>
             <Text style={styles.historico}>Histórico</Text>
+
             {manutencoes.length === 0 && (
               <Text style={{ color: "#888", marginTop: 10 }}>
                 Nenhuma manutenção registrada
@@ -203,7 +197,7 @@ export default function ManutencaoScreen() {
           </View>
         }
         contentContainerStyle={styles.scroll}
-        data={manutencoes}
+        data={[...manutencoes].reverse()}
         keyExtractor={(_, idx) => idx.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -231,85 +225,93 @@ export default function ManutencaoScreen() {
           </TouchableOpacity>
         )}
       />
-
-      {/* Modal Detalhes */}
       <Modal visible={modalVisible} transparent animationType="fade">
-  <View style={styles.overlay}>
-    <View style={styles.modalContent}>
-      <TouchableOpacity
-        style={styles.closeButton}
-        onPress={() => setModalVisible(false)}
-      >
-        <Ionicons name="close" size={24} color="#888" />
-      </TouchableOpacity>
-      <Text style={styles.modalTitle}>Detalhes da Manutenção</Text>
-      <View style={styles.info}>
-        <View style={styles.desc}>
-          <Text style={styles.labelInfo}>Data:</Text>
-          <Text style={styles.inputInfo}>{manutencaoSelecionada?.data}</Text>
-        </View>
-        <View style={styles.desc}>
-          <Text style={styles.labelInfo}>Moto:</Text>
-          <Text style={styles.inputInfo}>{manutencaoSelecionada?.moto}</Text>
-        </View>
-        <View style={styles.desc}>
-          <Text style={styles.labelInfo}>Tipo</Text>
-          <Text style={styles.inputInfo}>{manutencaoSelecionada?.tipo}</Text>
-        </View>
-        <View style={styles.desc}>
-          <Text style={styles.labelInfo}>Descrição:</Text>
-          <Text style={styles.inputInfo}>
-            {manutencaoSelecionada?.descricao}
-          </Text>
-        </View>
-      </View>
+        <View style={styles.overlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Ionicons name="close" size={24} color="#888" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Detalhes da Manutenção</Text>
+            <View style={styles.info}>
+              <View style={styles.desc}>
+                <Text style={styles.labelInfo}>Data:</Text>
+                <Text style={styles.inputInfo}>
+                  {manutencaoSelecionada?.data}
+                </Text>
+              </View>
+              <View style={styles.desc}>
+                <Text style={styles.labelInfo}>Moto:</Text>
+                <Text style={styles.inputInfo}>
+                  {manutencaoSelecionada?.moto}
+                </Text>
+              </View>
+              <View style={styles.desc}>
+                <Text style={styles.labelInfo}>Tipo</Text>
+                <Text style={styles.inputInfo}>
+                  {manutencaoSelecionada?.tipo}
+                </Text>
+              </View>
+              <View style={styles.desc}>
+                <Text style={styles.labelInfo}>Descrição:</Text>
+                <Text style={styles.inputInfo}>
+                  {manutencaoSelecionada?.descricao}
+                </Text>
+              </View>
+            </View>
 
-      {/* Condicional de status */}
-      {manutencaoSelecionada?.status === "pendente" ? (
-        <View style={{ flexDirection: "row", gap: 20, marginTop: 20 }}>
-          <TouchableOpacity onPress={() => atualizarStatus("concluído")}>
-            <Text style={styles.confirmar}>Confirmar pedido</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => atualizarStatus("excluído")}>
-            <Text style={styles.excluir}>Excluir pedido</Text>
-          </TouchableOpacity>
+            {manutencaoSelecionada?.status === "pendente" ? (
+              <View style={{ flexDirection: "row", gap: 20, marginTop: 20 }}>
+                <TouchableOpacity onPress={() => atualizarStatus("concluído")}>
+                  <Text style={styles.confirmar}>Confirmar pedido</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => atualizarStatus("excluído")}>
+                  <Text style={styles.excluir}>Excluir pedido</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View
+                style={{
+                  alignItems: "center",
+                  marginTop: 20,
+                  flexDirection: "row",
+                }}
+              >
+                <Text
+                  style={{
+                    color:
+                      manutencaoSelecionada?.status === "concluído"
+                        ? colors.verde
+                        : "red",
+                    fontWeight: "bold",
+                    fontSize: 16,
+                  }}
+                >
+                  {manutencaoSelecionada?.status === "concluído"
+                    ? "Esse pedido foi confirmado!"
+                    : "Esse pedido foi excluído!"}
+                </Text>
+                <Ionicons
+                  name={
+                    manutencaoSelecionada?.status === "concluído"
+                      ? "checkmark"
+                      : "close"
+                  }
+                  size={24}
+                  color={
+                    manutencaoSelecionada?.status === "concluído"
+                      ? colors.verde
+                      : "red"
+                  }
+                  style={{ marginLeft: 6 }}
+                />
+              </View>
+            )}
+          </View>
         </View>
-      ) : (
-        <View style={{ alignItems: "center", marginTop: 20, flexDirection: "row"}}>
-          <Text
-            style={{
-              color:
-              manutencaoSelecionada?.status === "concluído"
-              ? colors.verde
-              : "red",
-              fontWeight: "bold",
-              fontSize: 16,
-            }}
-          >
-            {manutencaoSelecionada?.status === "concluído"
-              ? "Esse pedido foi confirmado!"
-              : "Esse pedido foi excluído!"}
-          </Text>
-              <Ionicons
-                name={
-                  manutencaoSelecionada?.status === "concluído"
-                    ? "checkmark"
-                    : "close"
-                }
-                size={24}
-                color={
-                  manutencaoSelecionada?.status === "concluído"
-                    ? colors.verde
-                    : "red"
-                }
-                style={{ marginLeft: 6 }}
-              />
-        </View>
-      )}
-    </View>
-  </View>
-</Modal>
-
+      </Modal>
     </View>
   );
 }

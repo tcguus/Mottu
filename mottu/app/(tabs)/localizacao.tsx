@@ -58,7 +58,6 @@ export default function Localizacao() {
           .map((m: any) => m.moto)
       : [];
 
-    // Remove motos com manutenção pendente
     listaMotos = listaMotos.filter((m: any) => {
       const identificador = `${m.placa} | ${m.modelo}`;
       return !manutencoesPendentes.includes(identificador);
@@ -225,16 +224,12 @@ export default function Localizacao() {
                 </Text>
               </View>
               <View style={styles.desc}>
-                <Text style={styles.labelInfo}>Ano:</Text>
-                <Text style={styles.inputInfo}>
-                  {selectedMoto?.ano}
-                </Text>
+                <Text style={styles.labelInfo}>Chassi (VIN)</Text>
+                <Text style={styles.inputInfo}>{selectedMoto?.ano}</Text>
               </View>
               <View style={styles.desc}>
-                <Text style={styles.labelInfo}>Chassi:</Text>
-                <Text style={styles.inputInfo}>
-                  {selectedMoto?.chassi}
-                </Text>
+                <Text style={styles.labelInfo}>Ano:</Text>
+                <Text style={styles.inputInfo}>{selectedMoto?.chassi}</Text>
               </View>
             </View>
           </View>
@@ -276,8 +271,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: colors.branco,
-   paddingHorizontal: 24,
-   paddingBottom: 24,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
     paddingTop: 36,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
