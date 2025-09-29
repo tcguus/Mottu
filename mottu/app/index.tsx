@@ -10,51 +10,37 @@ import {
   Image,
   Animated,
   Easing,
+  ActivityIndicator,
 } from "react-native";
-import colors from "../constants/theme";
+import colors, { theme } from "../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useAuth } from "../context/UserContext";
+import { Link } from "expo-router";
+import { useUser } from "../context/UserContext";
 
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
-  const [id, setId] = useState("");
-  const [senha, setSenha] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [funcao, setFuncao] = useState<"Gerente" | "Operador" | "">("");
-  const { login } = useAuth();
-  const router = useRouter();
-  const handleLogin = () => {
-    if (
-      (id === "12345" && senha === "12345") ||
-      (id === "54321" && senha === "54321")
-    ) {
-      const userFuncao: "Gerente" | "Operador" =
-        id === "12345" ? "Gerente" : "Operador";
-      setFuncao(userFuncao);
-
-      const usuario = {
-        nome: "Gustavo Camargo",
-        id,
-        funcao: userFuncao,
-      };
-
-      login(usuario);
-      setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-        setModalVisible(true);
-        setTimeout(() => {
-          setModalVisible(false);
-          router.replace("/(tabs)/motos");
-        }, 2000);
-      }, 1500);
-    } else {
-      Alert.alert("Erro", "ID ou senha inválidos");
+  const { user } = useUser();
+  const { signIn } = useUser();
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Atenção", "Por favor, preencha o email e a senha.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await signIn(email, password);
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "Email ou senha inválidos.";
+      Alert.alert("Erro de Login", errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
-
   const spinAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     const animation = Animated.loop(
@@ -65,9 +51,7 @@ export default function LoginScreen() {
         easing: Easing.linear,
       })
     );
-
     animation.start();
-
     return () => animation.stop();
   }, [spinAnim]);
 
@@ -81,20 +65,22 @@ export default function LoginScreen() {
         <View style={styles.whiteContainer}>
           <Text style={styles.title}>Log In</Text>
           <TextInput
-            placeholder="Digite seu ID"
+            placeholder="Digite seu email"
             placeholderTextColor={colors.verde}
             style={styles.input}
-            value={id}
-            onChangeText={setId}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
           <View style={styles.passwordContainer}>
             <TextInput
               placeholder="Digite sua senha"
-              placeholderTextColor={colors.verde}
+              placeholderTextColor={theme.light.tint}
               style={styles.inputSenha}
               secureTextEntry={!showPassword}
-              value={senha}
-              onChangeText={setSenha}
+              value={password}
+              onChangeText={setPassword}
             />
             <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
@@ -103,54 +89,49 @@ export default function LoginScreen() {
               <Ionicons
                 name={showPassword ? "eye" : "eye-off"}
                 size={24}
-                color={colors.verde}
+                color={theme.light.tint}
               />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Entrar</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color={theme.light.background} />
+            ) : (
+              <Text style={styles.buttonText}>Entrar</Text>
+            )}
           </TouchableOpacity>
+
+          <Link href="/register" asChild>
+            <TouchableOpacity
+              style={{ marginBottom: 40, alignItems: "center" }}
+            >
+              <Text style={{ color: "#007AFF", fontSize: 16 }}>
+                Não tem uma conta? Cadastre-se
+              </Text>
+            </TouchableOpacity>
+          </Link>
           <Text style={styles.rodape}>
             © 2025 Mottu - Todos os direitos reservados
           </Text>
         </View>
       </View>
-      {loading && (
-        <View style={styles.loadingOverlay}>
-          <Animated.View
-            style={[
-              styles.spinner,
-              {
-                transform: [
-                  {
-                    rotate: spinAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ["0deg", "360deg"],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          />
-        </View>
-      )}
-
       <Modal
         transparent
         visible={modalVisible}
         animationType="fade"
-        onRequestClose={() => {}}
+        onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.bemVindo}>
-              Seja bem-vindo, Gustavo Camargo!
-            </Text>
-            <Text style={styles.info}>
-              {funcao} | ID: {id}
-            </Text>
+        {user && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.bemVindo}>Seja bem-vindo, {user.nome}!</Text>
+            </View>
           </View>
-        </View>
+        )}
       </Modal>
     </View>
   );
@@ -159,14 +140,14 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   fullscreen: {
     flex: 1,
-    backgroundColor: colors.verde,
+    backgroundColor: theme.light.tint,
   },
   loginContainer: {
     flex: 1,
     alignItems: "center",
   },
   whiteContainer: {
-    backgroundColor: colors.branco,
+    backgroundColor: theme.light.background,
     borderBottomRightRadius: 170,
     borderTopLeftRadius: 170,
     width: "100%",
@@ -178,45 +159,42 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 60,
     fontWeight: "bold",
-    color: colors.verde,
+    color: theme.light.tint,
     marginBottom: 40,
   },
   input: {
     borderWidth: 2,
-    borderColor: colors.verde,
+    borderColor: theme.light.tint,
     borderRadius: 14,
     padding: 22,
     width: "65%",
-    color: colors.verde,
+    color: theme.light.tint,
     marginBottom: 20,
     fontWeight: "bold",
   },
   button: {
-    backgroundColor: colors.verde,
+    backgroundColor: theme.light.tint,
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 12,
     marginTop: 20,
-    marginBottom: 80,
+    marginBottom: 10,
+    minWidth: "65%",
+    height: 54,
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonText: {
-    color: colors.branco,
+    color: theme.light.background,
     fontWeight: "bold",
-    fontSize: 24,
+    fontSize: 22,
   },
   rodape: {
     fontSize: 12,
-    color: colors.verde,
+    color: theme.light.tint,
     position: "absolute",
     bottom: 100,
     fontWeight: "600",
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 2,
   },
   modalOverlay: {
     flex: 1,
@@ -225,25 +203,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: colors.branco,
+    backgroundColor: theme.light.background,
     padding: 24,
     borderRadius: 12,
     alignItems: "center",
     width: "80%",
     elevation: 5,
-    borderColor: colors.verde,
+    borderColor: theme.light.tint,
     borderWidth: 2,
   },
   bemVindo: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 12,
-    color: colors.verde,
+    color: theme.light.tint,
     textAlign: "center",
   },
   info: {
     fontSize: 16,
-    color: colors.preto,
+    color: theme.light.text,
     marginBottom: 14,
     fontWeight: "bold",
   },
@@ -254,25 +232,16 @@ const styles = StyleSheet.create({
   },
   inputSenha: {
     borderWidth: 2,
-    borderColor: colors.verde,
+    borderColor: theme.light.tint,
     borderRadius: 14,
     padding: 22,
     paddingRight: 50,
-    color: colors.verde,
+    color: theme.light.tint,
     fontWeight: "bold",
   },
   iconSenha: {
     position: "absolute",
     right: 16,
     top: "35%",
-  },
-  spinner: {
-    width: 60,
-    height: 60,
-    borderWidth: 6,
-    borderColor: "#333",
-    borderTopColor: colors.verde,
-    borderRadius: 30,
-    marginBottom: 20,
   },
 });

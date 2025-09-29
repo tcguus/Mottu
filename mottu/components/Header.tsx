@@ -12,7 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import colors from "../constants/theme";
-import { useAuth } from "../context/UserContext";
+import { useUser } from "../context/UserContext";
 
 type HeaderProps = {
   title?: string;
@@ -21,7 +21,7 @@ type HeaderProps = {
 
 export default function Header({ title, showBackButton = false }: HeaderProps) {
   const router = useRouter();
-  const { usuario, logout } = useAuth();
+  const { user, signOut } = useUser();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
@@ -95,7 +95,7 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
   const handleLogout = () => {
     setShowLoading(true);
     setTimeout(() => {
-      logout();
+      signOut();
       setShowLoading(false);
       router.replace("/");
     }, 2000);
@@ -135,11 +135,11 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
           </Animated.View>
         </TouchableOpacity>
 
-        {usuario && (
+        {user && (
           <View style={styles.drawerContent}>
-            <Text style={styles.drawerText}>{usuario.nome}</Text>
+            <Text style={styles.drawerText}>Logado como:</Text>
             <Text style={styles.drawerSubText}>
-              {usuario.funcao} | ID: {usuario.id}
+              {user.nome} 
             </Text>
             <TouchableOpacity
               onPress={handleLogout}

@@ -1,11 +1,11 @@
 import { Slot } from "expo-router";
 import React from "react";
-import { AuthProvider } from "../context/UserContext";
+import { UserProvider } from "../context/UserContext";
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
+    <UserProvider>
       <Slot />
-    </AuthProvider>
+    </UserProvider>
   );
 }
