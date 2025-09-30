@@ -9,29 +9,28 @@ import {
   Alert,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
-import { theme } from "../constants/theme"; 
+import { theme } from "../constants/theme";
 import api from "../services/api";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function RegisterScreen() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
-  const [senha] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const handleRegister = async () => {
-    if (!nome || !email || !senha) {
+    if (!nome || !email || !password) {
       Alert.alert("Atenção", "Por favor, preencha todos os campos.");
       return;
     }
     setIsLoading(true);
     try {
-      await api.post("/Auth/register", { nome, email, senha });
+      await api.post("/Auth/register", { nome, email, senha: password });
 
       Alert.alert("Sucesso!", "Conta criada. Você já pode fazer o login.");
-      router.replace("/"); 
+      router.replace("/");
     } catch (error: any) {
       console.error("Erro no cadastro:", error.response?.data);
       const errorMessage =
@@ -66,7 +65,7 @@ export default function RegisterScreen() {
       <View style={styles.passwordContainer}>
         <TextInput
           placeholder="Digite sua senha"
-          placeholderTextColor={theme.light.tint} 
+          placeholderTextColor={theme.light.tint}
           style={styles.inputSenha}
           secureTextEntry={!showPassword}
           value={password}
@@ -79,7 +78,7 @@ export default function RegisterScreen() {
           <Ionicons
             name={showPassword ? "eye" : "eye-off"}
             size={24}
-            color={theme.light.tint} 
+            color={theme.light.tint}
           />
         </TouchableOpacity>
       </View>
@@ -153,7 +152,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 22,
     paddingRight: 50,
-    color: theme.light.tint, 
+    color: theme.light.tint,
     fontWeight: "bold",
   },
   iconSenha: {

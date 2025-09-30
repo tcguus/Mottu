@@ -7,38 +7,35 @@ import {
   TouchableOpacity,
   FlatList,
   Modal,
+  Alert,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
 import colors from "../../constants/theme";
 import Header from "../../components/Header";
 import { useFocusEffect } from "@react-navigation/native";
+import api from "../../services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-type Moto = {
-  placa: string;
-  modelo: string;
-};
+type ManutencaoStatus = "Aberta" | "Concluida" | "excluido";
 
 type Manutencao = {
-  moto: string;
-  tipo: string;
-  descricao: string;
+  id: string;
+  placa: string;
+  problemas: string;
   data: string;
-  status: "pendente" | "concluído" | "excluído";
+  status: ManutencaoStatus;
 };
 
+const EXCLUIDAS_STORAGE_KEY = "@manutencoes_excluidas";
+
 export default function ManutencaoScreen() {
-  const [, setMotos] = useState<Moto[]>([]);
   const [manutencoes, setManutencoes] = useState<Manutencao[]>([]);
   const [descricao, setDescricao] = useState("");
-  const [data, setData] = useState(new Date());
-  const [mostrarData, setMostrarData] = useState(false);
   const [openMoto, setOpenMoto] = useState(false);
   const [motoSelecionada, setMotoSelecionada] = useState<string | null>(null);
   const [listaMotos, setListaMotos] = useState<
-    { label: string; value: string }[]
+    { label: string; value: string; disabled?: boolean }[]
   >([]);
   const [openTipo, setOpenTipo] = useState(false);
   const [tipo, setTipo] = useState<string | null>(null);
@@ -55,64 +52,111 @@ export default function ManutencaoScreen() {
   const [manutencaoSelecionada, setManutencaoSelecionada] =
     useState<Manutencao | null>(null);
 
+  const carregarDados = async () => {
+    try {
+      const [motosResponse, manutencoesResponse, excluidasData] =
+        await Promise.all([
+          api.get("/Motos"),
+          api.get("/Manutencoes"),
+          AsyncStorage.getItem(EXCLUIDAS_STORAGE_KEY),
+        ]);
+      const motosDaApi = motosResponse.data.items;
+      if (motosDaApi.length > 0) {
+        setListaMotos(
+          motosDaApi.map((m: { placa: string; modelo: string }) => ({
+            label: `${m.placa} | ${m.modelo}`,
+            value: m.placa,
+          }))
+        );
+      } else {
+        setListaMotos([
+          { label: "Nenhuma moto cadastrada", value: "none", disabled: true },
+        ]);
+      }
+      const manutencoesDaApi = manutencoesResponse.data.items;
+      const manutencoesExcluidas = excluidasData
+        ? JSON.parse(excluidasData)
+        : [];
+      const listaCompleta = [...manutencoesDaApi, ...manutencoesExcluidas].sort(
+        (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
+      );
+
+      setManutencoes(listaCompleta);
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+      Alert.alert("Erro", "Não foi possível buscar os dados da API.");
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
-      const carregarDados = async () => {
-        const dataMotos = await AsyncStorage.getItem("@motos");
-        const dataManut = await AsyncStorage.getItem("@manutencoes");
-
-        if (dataMotos) {
-          const lista = JSON.parse(dataMotos);
-          setMotos(lista);
-          setListaMotos(
-            lista.length > 0
-              ? lista.map((m: Moto) => ({
-                  label: `${m.placa} | ${m.modelo}`,
-                  value: `${m.placa} | ${m.modelo}`,
-                }))
-              : [
-                  {
-                    label: "Nenhuma moto cadastrada",
-                    value: "none",
-                    disabled: true,
-                  },
-                ]
-          );
-        }
-
-        if (dataManut) setManutencoes(JSON.parse(dataManut));
-      };
-
       carregarDados();
     }, [])
   );
 
   const salvarManutencao = async () => {
-    if (!motoSelecionada || !tipo || !data) return;
-    const nova: Manutencao = {
-      moto: motoSelecionada,
-      tipo,
-      descricao,
-      data: data.toLocaleDateString("pt-BR"),
-      status: "pendente",
+    if (!motoSelecionada || !tipo) {
+      Alert.alert("Atenção", "Selecione a moto e o tipo de manutenção.");
+      return;
+    }
+    const novaManutencao = {
+      Placa: motoSelecionada,
+      Problemas: descricao ? `${tipo}: ${descricao}` : tipo,
     };
-    const atualizadas = [...manutencoes, nova];
-    setManutencoes(atualizadas);
-    await AsyncStorage.setItem("@manutencoes", JSON.stringify(atualizadas));
-    setMotoSelecionada(null);
-    setTipo(null);
-    setDescricao("");
-    setData(new Date());
+    try {
+      await api.post("/Manutencoes", novaManutencao);
+      setMotoSelecionada(null);
+      setTipo(null);
+      setDescricao("");
+      await carregarDados();
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "Erro ao salvar manutenção.";
+      Alert.alert("Erro", errorMessage);
+    }
   };
 
-  const atualizarStatus = async (status: "concluído" | "excluído") => {
+  const concluirManutencao = async () => {
     if (!manutencaoSelecionada) return;
-    const atualizadas = manutencoes.map((m) =>
-      m === manutencaoSelecionada ? { ...m, status } : m
-    );
-    setManutencoes(atualizadas);
-    await AsyncStorage.setItem("@manutencoes", JSON.stringify(atualizadas));
-    setModalVisible(false);
+    try {
+      await api.put(`/Manutencoes/${manutencaoSelecionada.id}`, {
+        Status: "Concluida",
+        Problemas: manutencaoSelecionada.problemas,
+      });
+      setModalVisible(false);
+      await carregarDados();
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "Erro ao concluir manutenção.";
+      Alert.alert("Erro", errorMessage);
+    }
+  };
+  const excluirManutencao = async () => {
+    if (!manutencaoSelecionada) return;
+    try {
+      await api.delete(`/Manutencoes/${manutencaoSelecionada.id}`);
+      const excluidasData = await AsyncStorage.getItem(EXCLUIDAS_STORAGE_KEY);
+      const excluidas = excluidasData ? JSON.parse(excluidasData) : [];
+      const novaExcluida = {
+        ...manutencaoSelecionada,
+        status: "excluido" as ManutencaoStatus,
+      };
+      const listaAtualizada = [
+        ...excluidas.filter((m: Manutencao) => m.id !== novaExcluida.id),
+        novaExcluida,
+      ];
+      await AsyncStorage.setItem(
+        EXCLUIDAS_STORAGE_KEY,
+        JSON.stringify(listaAtualizada)
+      );
+
+      setModalVisible(false);
+      await carregarDados();
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "Erro ao excluir manutenção.";
+      Alert.alert("Erro", errorMessage);
+    }
   };
 
   return (
@@ -123,25 +167,12 @@ export default function ManutencaoScreen() {
         style={{ width: "100%", maxHeight: "90%" }}
         ListHeaderComponent={
           <View style={{ alignItems: "center", zIndex: 1000 }}>
-            <Text style={styles.title}>Cadastre uma moto</Text>
-            <Text style={styles.label}>Data</Text>
-            <TouchableOpacity
-              style={styles.inputBox}
-              onPress={() => setMostrarData(true)}
-            >
-              <Text>{data.toLocaleDateString("pt-BR")}</Text>
-            </TouchableOpacity>
-            {mostrarData && (
-              <DateTimePicker
-                value={data}
-                mode="date"
-                display="default"
-                onChange={(event: unknown, selectedDate?: Date) => {
-                  setMostrarData(false);
-                  if (selectedDate) setData(selectedDate);
-                }}
-              />
-            )}
+            <Text style={styles.title}>Cadastrar Manutenção</Text>
+            <Text style={styles.label}>Data (Automática)</Text>
+            <View style={styles.inputBox}>
+              <Text>{new Date().toLocaleDateString("pt-BR")}</Text>
+            </View>
+
             <Text style={styles.label}>Escolha uma moto</Text>
             <DropDownPicker
               open={openMoto}
@@ -155,8 +186,6 @@ export default function ManutencaoScreen() {
               dropDownContainerStyle={styles.dropDownContainer}
               zIndex={3000}
               zIndexInverse={1000}
-              textStyle={{ color: "black" }}
-              placeholderStyle={{ color: "#888" }}
             />
             <Text style={styles.label}>Tipo de Manutenção</Text>
             <DropDownPicker
@@ -171,10 +200,8 @@ export default function ManutencaoScreen() {
               dropDownContainerStyle={styles.dropDownContainer}
               zIndex={2000}
               zIndexInverse={2000}
-              textStyle={{ color: "black" }}
-              placeholderStyle={{ color: "#888" }}
             />
-            <Text style={styles.label}>Descrição</Text>
+            <Text style={styles.label}>Descrição (Opcional)</Text>
             <TextInput
               multiline
               numberOfLines={4}
@@ -197,8 +224,8 @@ export default function ManutencaoScreen() {
           </View>
         }
         contentContainerStyle={styles.scroll}
-        data={[...manutencoes].reverse()}
-        keyExtractor={(_, idx) => idx.toString()}
+        data={manutencoes}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() => {
@@ -208,19 +235,19 @@ export default function ManutencaoScreen() {
             style={styles.card}
           >
             <View style={styles.cardLeft}>
-              <Text style={styles.cardTitulo}>{item.moto}</Text>
-              <Text>{item.tipo}</Text>
+              <Text style={styles.cardTitulo}>{item.placa}</Text>
+              <Text>{item.problemas}</Text>
             </View>
             <Ionicons
               name={
-                item.status === "concluído"
+                item.status === "Concluida"
                   ? "checkmark-circle"
-                  : item.status === "excluído"
+                  : item.status === "excluido"
                   ? "close-circle"
                   : "hourglass-outline"
               }
               size={22}
-              color={item.status === "excluído" ? "red" : colors.verde}
+              color={item.status === "excluido" ? "red" : colors.verde}
             />
           </TouchableOpacity>
         )}
@@ -239,36 +266,33 @@ export default function ManutencaoScreen() {
               <View style={styles.desc}>
                 <Text style={styles.labelInfo}>Data:</Text>
                 <Text style={styles.inputInfo}>
-                  {manutencaoSelecionada?.data}
+                  {manutencaoSelecionada?.data
+                    ? new Date(manutencaoSelecionada.data).toLocaleDateString(
+                        "pt-BR"
+                      )
+                    : ""}
                 </Text>
               </View>
               <View style={styles.desc}>
-                <Text style={styles.labelInfo}>Moto:</Text>
+                <Text style={styles.labelInfo}>Moto (Placa):</Text>
                 <Text style={styles.inputInfo}>
-                  {manutencaoSelecionada?.moto}
+                  {manutencaoSelecionada?.placa}
                 </Text>
               </View>
               <View style={styles.desc}>
-                <Text style={styles.labelInfo}>Tipo</Text>
+                <Text style={styles.labelInfo}>Problemas:</Text>
                 <Text style={styles.inputInfo}>
-                  {manutencaoSelecionada?.tipo}
-                </Text>
-              </View>
-              <View style={styles.desc}>
-                <Text style={styles.labelInfo}>Descrição:</Text>
-                <Text style={styles.inputInfo}>
-                  {manutencaoSelecionada?.descricao}
+                  {manutencaoSelecionada?.problemas}
                 </Text>
               </View>
             </View>
-
-            {manutencaoSelecionada?.status === "pendente" ? (
+            {manutencaoSelecionada?.status === "Aberta" ? (
               <View style={{ flexDirection: "row", gap: 20, marginTop: 20 }}>
-                <TouchableOpacity onPress={() => atualizarStatus("concluído")}>
-                  <Text style={styles.confirmar}>Confirmar pedido</Text>
+                <TouchableOpacity onPress={concluirManutencao}>
+                  <Text style={styles.confirmar}>Concluir Manutenção</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => atualizarStatus("excluído")}>
-                  <Text style={styles.excluir}>Excluir pedido</Text>
+                <TouchableOpacity onPress={excluirManutencao}>
+                  <Text style={styles.excluir}>Excluir Manutenção</Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -282,26 +306,26 @@ export default function ManutencaoScreen() {
                 <Text
                   style={{
                     color:
-                      manutencaoSelecionada?.status === "concluído"
+                      manutencaoSelecionada?.status === "Concluida"
                         ? colors.verde
                         : "red",
                     fontWeight: "bold",
                     fontSize: 16,
                   }}
                 >
-                  {manutencaoSelecionada?.status === "concluído"
-                    ? "Esse pedido foi confirmado!"
-                    : "Esse pedido foi excluído!"}
+                  {manutencaoSelecionada?.status === "Concluida"
+                    ? "Esta manutenção foi concluída!"
+                    : "Esta manutenção foi excluída!"}
                 </Text>
                 <Ionicons
                   name={
-                    manutencaoSelecionada?.status === "concluído"
+                    manutencaoSelecionada?.status === "Concluida"
                       ? "checkmark"
                       : "close"
                   }
                   size={24}
                   color={
-                    manutencaoSelecionada?.status === "concluído"
+                    manutencaoSelecionada?.status === "Concluida"
                       ? colors.verde
                       : "red"
                   }
@@ -331,7 +355,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     alignSelf: "flex-start",
-    marginLeft: 6,
+    marginLeft: "8%",
     marginTop: 10,
     marginBottom: 2,
   },
@@ -340,8 +364,7 @@ const styles = StyleSheet.create({
     borderColor: colors.verde,
     borderRadius: 12,
     padding: 10,
-    width: 350,
-    maxHeight: 90,
+    width: "85%",
     marginBottom: 8,
   },
   descricao: {
@@ -351,21 +374,21 @@ const styles = StyleSheet.create({
     borderColor: colors.verde,
     borderRadius: 12,
     padding: 10,
-    width: 350,
+    width: "85%",
   },
   dropDown: {
     borderColor: colors.verde,
     borderWidth: 2,
     marginBottom: 10,
-    width: 350,
+    width: "85%",
     alignSelf: "center",
     borderRadius: 12,
   },
   dropDownContainer: {
-    borderColor: "#888",
-    width: 350,
+    borderColor: colors.verde,
+    width: "85%",
     alignSelf: "center",
-    borderWidth: 1,
+    borderWidth: 2,
   },
   botao: {
     backgroundColor: colors.verde,
@@ -382,7 +405,11 @@ const styles = StyleSheet.create({
   historico: {
     fontSize: 22,
     fontWeight: "bold",
-    marginTop: 10,
+    marginTop: 20,
+    borderTopColor: "#eee",
+    borderTopWidth: 2,
+    paddingTop: 20,
+    width: "85%",
   },
   title: {
     fontSize: 26,
@@ -395,7 +422,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    width: "80%",
+    width: "85%",
     padding: 12,
     borderWidth: 2,
     borderColor: colors.verde,
@@ -404,6 +431,7 @@ const styles = StyleSheet.create({
   },
   cardLeft: {
     gap: 4,
+    flex: 1,
   },
   cardTitulo: {
     fontWeight: "bold",
@@ -455,7 +483,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   info: {
-    width: "85%",
+    width: "100%",
     backgroundColor: colors.branco,
     gap: 12,
   },
@@ -463,10 +491,9 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.verde,
     borderRadius: 12,
-    paddingTop: 2,
-    paddingBottom: 2,
+    paddingTop: 4,
+    paddingBottom: 4,
     paddingLeft: 18,
-    paddingRight: 18,
     fontWeight: "bold",
     width: "100%",
     gap: 4,

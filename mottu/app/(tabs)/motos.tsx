@@ -8,20 +8,23 @@ import {
   Image,
   FlatList,
   Modal,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import colors from "../../constants/theme";
 import Header from "../../components/Header";
 import { Ionicons } from "@expo/vector-icons";
+import api from "../../services/api";
 
 type ModeloType = "Pop" | "Sport" | "-E";
 type MotoType = {
   modelo: ModeloType;
   placa: string;
-  ano: string;
+  ano: number;
   chassi: string;
 };
 
+const CHASSI_STORAGE_KEY = "@motos_chassi";
 const imagens: Record<ModeloType, any> = {
   Pop: require("../../assets/images/pop.png"),
   Sport: require("../../assets/images/sport.png"),
@@ -36,44 +39,94 @@ export default function CadastroMoto() {
   const [modelo, setModelo] = useState<ModeloType>("Sport");
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [motoParaExcluir, setMotoParaExcluir] = useState<number | null>(null);
+  const [motoParaExcluir, setMotoParaExcluir] = useState<string | null>(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const loadMotos = async () => {
+    try {
+      const response = await api.get("/Motos");
+      const motosDaApi = response.data.items;
+      const chassiData = await AsyncStorage.getItem(CHASSI_STORAGE_KEY);
+      const chassiMap: Record<string, string> = chassiData
+        ? JSON.parse(chassiData)
+        : {};
+      const motosCompletas = motosDaApi.map(
+        (moto: Omit<MotoType, "chassi">) => ({
+          ...moto,
+          chassi: chassiMap[moto.placa] || "N/A",
+        })
+      );
+      setMotos(motosCompletas);
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Erro", "Não foi possível carregar as motos.");
+    }
+  };
 
   useEffect(() => {
-    const loadMotos = async () => {
-      const data = await AsyncStorage.getItem("@motos");
-      if (data) setMotos(JSON.parse(data));
-    };
     loadMotos();
   }, []);
 
-  const salvarMotos = async (novasMotos: MotoType[]) => {
-    await AsyncStorage.setItem("@motos", JSON.stringify(novasMotos));
+  const adicionarMoto = async () => {
+    if (!placa || !ano || !modelo || !chassi) {
+      Alert.alert("Atenção", "Preencha todos os campos para cadastrar a moto.");
+      return;
+    }
+
+    try {
+      const anoNumber = parseInt(ano, 10);
+      if (isNaN(anoNumber)) {
+        Alert.alert("Erro", "O ano deve ser um número válido.");
+        return;
+      }
+
+      const novaMotoApi = {
+        Placa: placa,
+        Ano: anoNumber,
+        Modelo: modelo,
+      };
+
+      await api.post("/Motos", novaMotoApi);
+
+      const chassiData = await AsyncStorage.getItem(CHASSI_STORAGE_KEY);
+      const chassiMap = chassiData ? JSON.parse(chassiData) : {};
+      chassiMap[placa] = chassi;
+      await AsyncStorage.setItem(CHASSI_STORAGE_KEY, JSON.stringify(chassiMap));
+
+      setPlaca("");
+      setAno("");
+      setChassi("");
+      setModelo("Sport");
+      setModalVisible(false);
+
+      await loadMotos();
+    } catch (error: any) {
+      console.error("Erro no cadastro:", error.response?.data);
+      const errorMessage =
+        error.response?.data?.message || "Falha ao cadastrar a moto.";
+      Alert.alert("Erro no Cadastro", errorMessage);
+    }
   };
 
-  const adicionarMoto = () => {
-    if (!placa || !ano || !chassi) return;
+  const deletarMoto = async (placaParaDeletar: string) => {
+    try {
+      await api.delete(`/Motos/${placaParaDeletar}`);
+      const chassiData = await AsyncStorage.getItem(CHASSI_STORAGE_KEY);
+      if (chassiData) {
+        const chassiMap = JSON.parse(chassiData);
+        delete chassiMap[placaParaDeletar];
+        await AsyncStorage.setItem(
+          CHASSI_STORAGE_KEY,
+          JSON.stringify(chassiMap)
+        );
+      }
 
-    const novaMoto: MotoType = {
-      modelo,
-      placa,
-      ano,
-      chassi,
-    };
-
-    const novasMotos = [...motos, novaMoto];
-    setMotos(novasMotos);
-    salvarMotos(novasMotos);
-    setPlaca("");
-    setAno("");
-    setChassi("");
-    setModalVisible(false);
-  };
-
-  const deletarMoto = async (index: number) => {
-    const novasMotos = motos.filter((_, i) => i !== index);
-    setMotos(novasMotos);
-    await AsyncStorage.setItem("@motos", JSON.stringify(novasMotos));
+      await loadMotos();
+    } catch (error: any) {
+      console.error("Erro ao excluir:", error.response?.data);
+      const errorMessage =
+        error.response?.data?.message || "Falha ao excluir a moto.";
+      Alert.alert("Erro ao Excluir", errorMessage);
+    }
   };
 
   const motosFiltradas = motos.filter((moto) =>
@@ -103,7 +156,7 @@ export default function CadastroMoto() {
         <Text style={styles.title}>Motos cadastradas</Text>
         <FlatList
           data={motosFiltradas}
-          keyExtractor={(item, index) => `${item.placa}-${index}`}
+          keyExtractor={(item) => item.placa}
           style={{ width: "90%", maxHeight: "72%" }}
           contentContainerStyle={{ paddingBottom: 100 }}
           ListEmptyComponent={() => (
@@ -118,13 +171,13 @@ export default function CadastroMoto() {
               Nenhuma moto encontrada
             </Text>
           )}
-          renderItem={({ item, index }) => (
+          renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <Text style={styles.modelo}>{item.modelo}</Text>
                 <TouchableOpacity
                   onPress={() => {
-                    setMotoParaExcluir(index);
+                    setMotoParaExcluir(item.placa);
                     setConfirmVisible(true);
                   }}
                 >
@@ -138,11 +191,11 @@ export default function CadastroMoto() {
                     <Text style={styles.inputInfo}>{item.placa}</Text>
                   </View>
                   <View style={styles.desc}>
-                    <Text style={styles.labelInfo}>Chassi (VIN)</Text>
+                    <Text style={styles.labelInfo}>Ano</Text>
                     <Text style={styles.inputInfo}>{item.ano}</Text>
                   </View>
                   <View style={styles.desc}>
-                    <Text style={styles.labelInfo}>Ano</Text>
+                    <Text style={styles.labelInfo}>Chassi (VIN)</Text>
                     <Text style={styles.inputInfo}>{item.chassi}</Text>
                   </View>
                 </View>
@@ -260,8 +313,9 @@ export default function CadastroMoto() {
                   maxLength={4}
                   placeholder="2020-2025"
                   placeholderTextColor={"#888"}
-                  value={chassi}
-                  onChangeText={setChassi}
+                  keyboardType="numeric"
+                  value={ano}
+                  onChangeText={setAno}
                 />
               </View>
               <View style={styles.inputt}>
@@ -271,8 +325,8 @@ export default function CadastroMoto() {
                   maxLength={17}
                   placeholder="0AA000AA00A000000"
                   placeholderTextColor={"#888"}
-                  value={ano}
-                  onChangeText={setAno}
+                  value={chassi}
+                  onChangeText={setChassi}
                 />
               </View>
               <TouchableOpacity
@@ -343,8 +397,9 @@ export default function CadastroMoto() {
             maxLength={4}
             placeholder="2020-2025"
             placeholderTextColor={"#888"}
-            value={chassi}
-            onChangeText={setChassi}
+            keyboardType="numeric"
+            value={ano}
+            onChangeText={setAno}
           />
         </View>
         <View style={styles.inputt}>
@@ -354,8 +409,8 @@ export default function CadastroMoto() {
             maxLength={17}
             placeholder="0AA000AA00A000000"
             placeholderTextColor={"#888"}
-            value={ano}
-            onChangeText={setAno}
+            value={chassi}
+            onChangeText={setChassi}
           />
         </View>
       </View>
