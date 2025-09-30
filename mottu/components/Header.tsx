@@ -20,7 +20,6 @@ type HeaderProps = {
   showBackButton?: boolean;
 };
 
-
 export default function Header({ title, showBackButton = false }: HeaderProps) {
   const router = useRouter();
   const { user, signOut } = useUser();
@@ -32,7 +31,6 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const spinAnim = useRef(new Animated.Value(0)).current;
 
-  // Animação do círculo girando
   useEffect(() => {
     Animated.loop(
       Animated.timing(spinAnim, {
@@ -105,7 +103,6 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
 
   return (
     <>
-      {/* Tela de carregamento */}
       {showLoading && (
         <Modal transparent animationType="fade">
           <View style={styles.loadingOverlay}>
@@ -116,15 +113,12 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
           </View>
         </Modal>
       )}
-
-      {/* Overlay escuro ao abrir drawer */}
       {drawerOpen && <View style={styles.fullOverlay} />}
-
-      {/* Drawer animado */}
       <Animated.View
         style={[
           styles.drawer,
-          { transform: [{ translateX: drawerTranslate }] }, {backgroundColor: colors.card}
+          { transform: [{ translateX: drawerTranslate }] },
+          { backgroundColor: colors.card },
         ]}
       >
         <TouchableOpacity onPress={toggleDrawer}>
@@ -139,36 +133,40 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
 
         {user && (
           <View style={styles.drawerContent}>
-            <Text style={[styles.drawerText, {color: colors.background}]}>Logado como:</Text>
-            <Text style={[styles.drawerSubText, {color: colors.background}]}>
-              {user.nome} 
+            <Text style={[styles.drawerText, { color: colors.background }]}>
+              Logado como:
             </Text>
-            <View style={styles.teste}> 
-
-            <TouchableOpacity
-              onPress={handleLogout}
-              style={styles.logoutButton}
-            >
-              <Ionicons
-                name="log-out-outline"
-                size={20}
-                color={colors.background}
-              />
-              <Text style={[styles.logoutText, {color: colors.background}]}>Log Out</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={toggleTheme} style={styles.actionButton}>
-          <Ionicons
-            name={theme === "light" ? "moon-outline" : "sunny-outline"}
-            size={26}
-            color={colors.background}
-          />
-        </TouchableOpacity>
+            <Text style={[styles.drawerSubText, { color: colors.background }]}>
+              {user.nome}
+            </Text>
+            <View style={styles.teste}>
+              <TouchableOpacity
+                onPress={handleLogout}
+                style={styles.logoutButton}
+              >
+                <Ionicons
+                  name="log-out-outline"
+                  size={20}
+                  color={colors.background}
+                />
+                <Text style={[styles.logoutText, { color: colors.background }]}>
+                  Log Out
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={toggleTheme}
+                style={styles.actionButton}
+              >
+                <Ionicons
+                  name={theme === "light" ? "moon-outline" : "sunny-outline"}
+                  size={26}
+                  color={colors.background}
+                />
+              </TouchableOpacity>
             </View>
           </View>
         )}
       </Animated.View>
-
-      {/* Header principal */}
       <View style={styles.header}>
         <TouchableOpacity onPress={toggleDrawer} style={styles.backButton}>
           <Animated.View style={{ transform: [{ rotate }] }}>
@@ -233,8 +231,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     marginLeft: 12,
     marginTop: 13,
-        gap: "4"
-
+    gap: "4",
   },
   drawerText: {
     fontSize: 18,
@@ -291,11 +288,11 @@ const styles = StyleSheet.create({
   actionButton: {
     marginBottom: 4,
   },
-  teste:{
+  teste: {
     marginTop: -15,
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: "70"
-  }
+    gap: "70",
+  },
 });

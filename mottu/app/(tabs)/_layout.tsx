@@ -6,17 +6,16 @@ import LocalizacaoIcon from "../../components/icons/LocalizacaoIcon";
 import React from "react";
 import { View } from "react-native";
 import { rawColors } from "@/constants/theme";
-import { useTheme } from "@/context/ThemeContext"; // 1. Importe o useTheme
-
+import { useTheme } from "@/context/ThemeContext"; 
 export default function TabLayout() {
-  const { colors } = useTheme(); // 2. Pegue as cores dinâmicas do tema
+  const { colors } = useTheme(); 
 
   return (
     <Tabs
       screenOptions={{
         tabBarShowLabel: false,
         tabBarStyle: {
-          backgroundColor: rawColors.verde, // O fundo da TabBar é sempre verde
+          backgroundColor: rawColors.verde, 
           borderRadius: 30,
           height: 60,
           width: "90%",

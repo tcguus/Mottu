@@ -19,7 +19,7 @@ import { rawColors } from "@/constants/theme";
 import { useTheme } from "@/context/ThemeContext";
 
 export default function LoginScreen() {
-  const { colors } = useTheme(); // <-- ADICIONE ESTA LINHA
+  const { colors } = useTheme(); 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,7 +64,12 @@ export default function LoginScreen() {
           source={require("../assets/images/mottu-logo.png")}
           style={{ width: 120, height: 120, marginTop: 50 }}
         />
-        <View style={[styles.whiteContainer, { backgroundColor: colors.background }]}>
+        <View
+          style={[
+            styles.whiteContainer,
+            { backgroundColor: colors.background },
+          ]}
+        >
           <Text style={styles.title}>Log In</Text>
           <TextInput
             placeholder="Digite seu email"
@@ -103,7 +108,9 @@ export default function LoginScreen() {
             {isLoading ? (
               <ActivityIndicator color={rawColors.branco} />
             ) : (
-              <Text style={[styles.buttonText, { color: colors.background }]}>Entrar</Text>
+              <Text style={[styles.buttonText, { color: colors.background }]}>
+                Entrar
+              </Text>
             )}
           </TouchableOpacity>
 
@@ -149,7 +156,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   whiteContainer: {
-
     borderBottomRightRadius: 170,
     borderTopLeftRadius: 170,
     width: "100%",

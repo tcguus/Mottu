@@ -312,7 +312,9 @@ export default function CadastroMoto() {
           style={styles.addButton}
           onPress={() => setModalVisible(true)}
         >
-          <Text style={[styles.addButtonText, { color: colors.background }]}>+</Text>
+          <Text style={[styles.addButtonText, { color: colors.background }]}>
+            +
+          </Text>
         </TouchableOpacity>
         <Modal
           visible={modalVisible}

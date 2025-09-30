@@ -1,4 +1,3 @@
-// Cores estáticas que nunca mudam
 export const rawColors = {
   verde: "#00B131",
   branco: "#FFFFFF",
@@ -9,7 +8,6 @@ export const rawColors = {
   textoClaro: "#E5E5E7",
 };
 
-// Conjunto de cores que mudam com o tema
 export const theme = {
   light: {
     background: rawColors.branco,

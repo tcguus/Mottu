@@ -9,11 +9,13 @@ import {
   Alert,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
-import { theme } from "../constants/theme";
 import api from "../services/api";
 import { Ionicons } from "@expo/vector-icons";
+import { rawColors } from "@/constants/theme";
+import { useTheme } from "../context/ThemeContext";
 
 export default function RegisterScreen() {
+  const { colors } = useTheme();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,7 +45,7 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {backgroundColor: colors.background}]}>
       <Text style={styles.title}>Criar Conta</Text>
 
       <TextInput
@@ -51,7 +53,7 @@ export default function RegisterScreen() {
         placeholder="Nome Completo"
         value={nome}
         onChangeText={setNome}
-        placeholderTextColor={theme.light.tint}
+        placeholderTextColor={rawColors.verde}
       />
       <TextInput
         style={styles.input}
@@ -60,12 +62,12 @@ export default function RegisterScreen() {
         autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
-        placeholderTextColor={theme.light.tint}
+        placeholderTextColor={rawColors.verde}
       />
       <View style={styles.passwordContainer}>
         <TextInput
           placeholder="Digite sua senha"
-          placeholderTextColor={theme.light.tint}
+          placeholderTextColor={rawColors.verde}
           style={styles.inputSenha}
           secureTextEntry={!showPassword}
           value={password}
@@ -78,7 +80,7 @@ export default function RegisterScreen() {
           <Ionicons
             name={showPassword ? "eye" : "eye-off"}
             size={24}
-            color={theme.light.tint}
+            color={rawColors.verde}
           />
         </TouchableOpacity>
       </View>
@@ -91,7 +93,7 @@ export default function RegisterScreen() {
         {isLoading ? (
           <ActivityIndicator color="#FFF" />
         ) : (
-          <Text style={styles.buttonText}>Cadastrar</Text>
+          <Text style={[styles.buttonText, {color: colors.background}]}>Cadastrar</Text>
         )}
       </TouchableOpacity>
 
@@ -112,25 +114,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 24,
     alignItems: "center",
+    backgroundColor: "#"
   },
   title: {
     fontSize: 40,
     fontWeight: "bold",
-    color: theme.light.tint,
+    color: rawColors.verde,
     marginBottom: 40,
   },
   input: {
     borderWidth: 2,
-    borderColor: theme.light.tint,
+    borderColor: rawColors.verde,
     borderRadius: 14,
     padding: 22,
     width: "65%",
-    color: theme.light.tint,
+    color: rawColors.verde,
     marginBottom: 20,
     fontWeight: "bold",
   },
   button: {
-    backgroundColor: theme.light.tint,
+    backgroundColor: rawColors.verde,
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 12,
@@ -148,11 +151,11 @@ const styles = StyleSheet.create({
   },
   inputSenha: {
     borderWidth: 2,
-    borderColor: theme.light.tint,
+    borderColor: rawColors.verde,
     borderRadius: 14,
     padding: 22,
     paddingRight: 50,
-    color: theme.light.tint,
+    color: rawColors.verde,
     fontWeight: "bold",
   },
   iconSenha: {
