@@ -9,6 +9,7 @@ import {
   FlatList,
   Modal,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import colors from "../../constants/theme";
@@ -32,6 +33,7 @@ const imagens: Record<ModeloType, any> = {
 };
 
 export default function CadastroMoto() {
+  const [isLoading, setIsLoading] = useState(true);
   const [motos, setMotos] = useState<MotoType[]>([]);
   const [placa, setPlaca] = useState("");
   const [ano, setAno] = useState("");
@@ -42,23 +44,34 @@ export default function CadastroMoto() {
   const [motoParaExcluir, setMotoParaExcluir] = useState<string | null>(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const loadMotos = async () => {
+    if (!isLoading) setIsLoading(true);
+
     try {
-      const response = await api.get("/Motos");
-      const motosDaApi = response.data.items;
-      const chassiData = await AsyncStorage.getItem(CHASSI_STORAGE_KEY);
-      const chassiMap: Record<string, string> = chassiData
-        ? JSON.parse(chassiData)
-        : {};
-      const motosCompletas = motosDaApi.map(
-        (moto: Omit<MotoType, "chassi">) => ({
-          ...moto,
-          chassi: chassiMap[moto.placa] || "N/A",
-        })
+      const minimumTimePromise = new Promise((resolve) =>
+        setTimeout(resolve, 1500)
       );
-      setMotos(motosCompletas);
+      const fetchDataPromise = async () => {
+        const response = await api.get("/Motos");
+        const motosDaApi = response.data.items;
+        const chassiData = await AsyncStorage.getItem(CHASSI_STORAGE_KEY);
+        const chassiMap: Record<string, string> = chassiData
+          ? JSON.parse(chassiData)
+          : {};
+
+        const motosCompletas = motosDaApi.map(
+          (moto: Omit<MotoType, "chassi">) => ({
+            ...moto,
+            chassi: chassiMap[moto.placa] || "N/A",
+          })
+        );
+        setMotos(motosCompletas);
+      };
+      await Promise.all([fetchDataPromise(), minimumTimePromise]);
     } catch (error) {
       console.error(error);
       Alert.alert("Erro", "Não foi possível carregar as motos.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -128,6 +141,29 @@ export default function CadastroMoto() {
       Alert.alert("Erro ao Excluir", errorMessage);
     }
   };
+
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: colors.branco,
+        }}
+      >
+        <Header title="Cadastre uma moto" showBackButton={true} />
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color={colors.verde} />
+          <Text style={{ marginTop: 10, color: colors.verde }}>
+            Carregando motos...
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   const motosFiltradas = motos.filter((moto) =>
     moto.placa.toLowerCase().includes(search.toLowerCase())

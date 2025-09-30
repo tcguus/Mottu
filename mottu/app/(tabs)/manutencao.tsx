@@ -8,6 +8,7 @@ import {
   FlatList,
   Modal,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -30,6 +31,7 @@ type Manutencao = {
 const EXCLUIDAS_STORAGE_KEY = "@manutencoes_excluidas";
 
 export default function ManutencaoScreen() {
+  const [isLoading, setIsLoading] = useState(true);
   const [manutencoes, setManutencoes] = useState<Manutencao[]>([]);
   const [descricao, setDescricao] = useState("");
   const [openMoto, setOpenMoto] = useState(false);
@@ -52,41 +54,57 @@ export default function ManutencaoScreen() {
   const [manutencaoSelecionada, setManutencaoSelecionada] =
     useState<Manutencao | null>(null);
 
-  const carregarDados = async () => {
+  const carregarDados = useCallback(async () => {
+    if (!isLoading) setIsLoading(true);
+
     try {
-      const [motosResponse, manutencoesResponse, excluidasData] =
-        await Promise.all([
-          api.get("/Motos"),
-          api.get("/Manutencoes"),
-          AsyncStorage.getItem(EXCLUIDAS_STORAGE_KEY),
-        ]);
-      const motosDaApi = motosResponse.data.items;
-      if (motosDaApi.length > 0) {
-        setListaMotos(
-          motosDaApi.map((m: { placa: string; modelo: string }) => ({
-            label: `${m.placa} | ${m.modelo}`,
-            value: m.placa,
-          }))
-        );
-      } else {
-        setListaMotos([
-          { label: "Nenhuma moto cadastrada", value: "none", disabled: true },
-        ]);
-      }
-      const manutencoesDaApi = manutencoesResponse.data.items;
-      const manutencoesExcluidas = excluidasData
-        ? JSON.parse(excluidasData)
-        : [];
-      const listaCompleta = [...manutencoesDaApi, ...manutencoesExcluidas].sort(
-        (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
+      const minimumTimePromise = new Promise((resolve) =>
+        setTimeout(resolve, 1500)
       );
 
-      setManutencoes(listaCompleta);
+      const fetchDataPromise = async () => {
+        const [motosResponse, manutencoesResponse, excluidasData] =
+          await Promise.all([
+            api.get("/Motos"),
+            api.get("/Manutencoes"),
+            AsyncStorage.getItem(EXCLUIDAS_STORAGE_KEY),
+          ]);
+
+        const motosDaApi = motosResponse.data.items;
+        if (motosDaApi.length > 0) {
+          setListaMotos(
+            motosDaApi.map((m: { placa: string; modelo: string }) => ({
+              label: `${m.placa} | ${m.modelo}`,
+              value: m.placa,
+            }))
+          );
+        } else {
+          setListaMotos([
+            { label: "Nenhuma moto cadastrada", value: "none", disabled: true },
+          ]);
+        }
+
+        const manutencoesDaApi = manutencoesResponse.data.items;
+        const manutencoesExcluidas = excluidasData
+          ? JSON.parse(excluidasData)
+          : [];
+        const listaCompleta = [
+          ...manutencoesDaApi,
+          ...manutencoesExcluidas,
+        ].sort(
+          (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
+        );
+        setManutencoes(listaCompleta);
+      };
+
+      await Promise.all([fetchDataPromise(), minimumTimePromise]);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
       Alert.alert("Erro", "Não foi possível buscar os dados da API.");
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -158,6 +176,29 @@ export default function ManutencaoScreen() {
       Alert.alert("Erro", errorMessage);
     }
   };
+
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: colors.branco,
+        }}
+      >
+        <Header title="Manutenção" showBackButton={true} />
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color={colors.verde} />
+          <Text style={{ marginTop: 10, color: colors.verde }}>
+            Carregando manutenções...
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
