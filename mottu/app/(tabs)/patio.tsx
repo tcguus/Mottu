@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   FlatList,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -14,10 +15,31 @@ import { Ionicons } from "@expo/vector-icons";
 import Header from "../../components/Header";
 import colors from "../../constants/theme";
 import { useFocusEffect } from "@react-navigation/native";
+import api from "../../services/api";
+
+type MotoApi = {
+  placa: string;
+  modelo: string;
+  ano: number;
+};
+
+type ManutencaoApi = {
+  placa: string;
+  problemas: string;
+  status: "Aberta" | "Concluida";
+};
+
+type MotoCompleta = MotoApi & {
+  chassi: string;
+  emManutencao: boolean;
+  tipoManutencao: string | null;
+};
+
+const CHASSI_STORAGE_KEY = "@motos_chassi";
 
 export default function Patio() {
-  const [motos, setMotos] = useState<any[]>([]);
-  const [selectedMoto, setSelectedMoto] = useState<any | null>(null);
+  const [motos, setMotos] = useState<MotoCompleta[]>([]);
+  const [selectedMoto, setSelectedMoto] = useState<MotoCompleta | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dropdownValue, setDropdownValue] = useState<string | null>(null);
@@ -26,64 +48,71 @@ export default function Patio() {
 
   useFocusEffect(
     useCallback(() => {
-      const loadMotos = async () => {
-        const data = await AsyncStorage.getItem("@motos");
-        const dataManutencao = await AsyncStorage.getItem("@manutencoes");
-        const motosCadastradas = data ? JSON.parse(data) : [];
-        const manutencoes = dataManutencao ? JSON.parse(dataManutencao) : [];
+      const carregarDados = async () => {
+        try {
+          const [motosResponse, manutencoesResponse, chassiData] =
+            await Promise.all([
+              api.get("/Motos"),
+              api.get("/Manutencoes"),
+              AsyncStorage.getItem(CHASSI_STORAGE_KEY),
+            ]);
 
-        const motosComInfos = motosCadastradas.map((moto: any) => {
-          const manut = manutencoes.find(
-            (m: any) =>
-              m.status === "pendente" &&
-              m.moto === `${moto.placa} | ${moto.modelo}`
+          const motosDaApi: MotoApi[] = motosResponse.data.items;
+          const manutencoesDaApi: ManutencaoApi[] =
+            manutencoesResponse.data.items;
+          const chassiMap: Record<string, string> = chassiData
+            ? JSON.parse(chassiData)
+            : {};
+          const motosCompletas = motosDaApi.map((moto) => {
+            const manut = manutencoesDaApi.find(
+              (m) => m.status === "Aberta" && m.placa === moto.placa
+            );
+            return {
+              ...moto,
+              chassi: chassiMap[moto.placa] || "N/A",
+              emManutencao: !!manut,
+              tipoManutencao: manut?.problemas || null,
+            };
+          });
+
+          setMotos(motosCompletas);
+          setDropdownItems(
+            motosCompletas.map((m) => ({
+              label: `${m.placa} | ${m.modelo}`,
+              value: `${m.placa} | ${m.modelo}`,
+            }))
           );
-          return {
-            ...moto,
-            emManutencao: !!manut,
-            tipoManutencao: manut?.tipo || null,
-            descricao: manut?.descricao || null,
-          };
-        });
-
-        setMotos(motosComInfos);
-
-        setDropdownItems(
-          motosComInfos.map((m: any) => ({
-            label: `${m.placa} | ${m.modelo}`,
-            value: `${m.placa} | ${m.modelo}`,
-          }))
-        );
+        } catch (error) {
+          console.error("Erro ao carregar dados do pátio:", error);
+          Alert.alert(
+            "Erro de Conexão",
+            "Não foi possível carregar os dados do pátio."
+          );
+        }
       };
 
-      loadMotos();
+      carregarDados();
     }, [])
   );
-
-  const abrirModal = (moto: any) => {
+  const abrirModal = (moto: MotoCompleta) => {
     setSelectedMoto(moto);
     setModalVisible(true);
   };
-
   const fecharModal = () => {
     setModalVisible(false);
     setSelectedMoto(null);
   };
-
   const handleSelecionarMoto = (val: string) => {
     setDropdownValue(val);
     setHighlightedMoto(val);
     setTimeout(() => setHighlightedMoto(null), 3000);
   };
-
   const disponiveis = motos.filter((m) => !m.emManutencao);
   const manutencao = motos.filter((m) => m.emManutencao);
-
   const vagasPorColuna = 10;
   const coluna1 = disponiveis.slice(0, vagasPorColuna);
   const coluna3 = disponiveis.slice(vagasPorColuna);
-
-  const renderColuna = (lista: any[], cor: string) => {
+  const renderColuna = (lista: MotoCompleta[], cor: string) => {
     const blocos = Array.from(
       { length: vagasPorColuna },
       (_, idx) => lista[idx] || null
@@ -160,8 +189,6 @@ export default function Patio() {
         dropDownDirection="BOTTOM"
         style={styles.dropdown}
         dropDownContainerStyle={styles.dropdownList}
-        textStyle={{ color: "black" }}
-        placeholderStyle={{ color: "#888" }}
         zIndex={10}
         zIndexInverse={9}
       />
@@ -193,34 +220,24 @@ export default function Patio() {
                 </Text>
               </View>
               <View style={styles.desc}>
-                <Text style={styles.labelInfo}>Chassi (VIN):</Text>
+                <Text style={styles.labelInfo}>Ano:</Text>
                 <Text style={styles.inputInfo}>{selectedMoto?.ano}</Text>
               </View>
               <View style={styles.desc}>
-                <Text style={styles.labelInfo}>Ano:</Text>
+                <Text style={styles.labelInfo}>Chassi (VIN):</Text>
                 <Text style={styles.inputInfo}>{selectedMoto?.chassi}</Text>
               </View>
             </View>
 
-            {selectedMoto?.tipoManutencao && selectedMoto?.descricao && (
-              <>
-                <View style={styles.infoProblema}>
-                  <View style={styles.desc}>
-                    <Text style={styles.labelInfo}>Tipo de manutenção:</Text>
-                    <Text style={styles.inputInfo}>
-                      {selectedMoto.tipoManutencao}
-                    </Text>
-                  </View>
-                  <View style={styles.desc}>
-                    <Text style={styles.labelInfo}>Descrição:</Text>
-                    <Text style={styles.inputInfo}>
-                      {selectedMoto.descricao.length > 30
-                        ? `${selectedMoto.descricao.slice(0, 27)}...`
-                        : selectedMoto.descricao}
-                    </Text>
-                  </View>
+            {selectedMoto?.emManutencao && (
+              <View style={styles.infoProblema}>
+                <View style={styles.desc}>
+                  <Text style={styles.labelInfo}>Manutenção em Aberto:</Text>
+                  <Text style={styles.inputInfo}>
+                    {selectedMoto.tipoManutencao}
+                  </Text>
                 </View>
-              </>
+              </View>
             )}
           </View>
         </View>
@@ -283,7 +300,7 @@ const styles = StyleSheet.create({
     minHeight: 600,
   },
   colunaManutencao: {
-    borderColor: "yellow",
+    borderColor: "gold",
   },
   vaga: {
     height: 50,

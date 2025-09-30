@@ -6,6 +6,7 @@ import {
   Modal,
   TouchableOpacity,
   Image,
+  Alert,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -14,22 +15,38 @@ import { Ionicons } from "@expo/vector-icons";
 import Header from "../../components/Header";
 import colors from "../../constants/theme";
 import { useFocusEffect } from "@react-navigation/native";
+import api from "../../services/api";
 
+type MotoApi = {
+  placa: string;
+  modelo: string;
+  ano: number;
+};
+
+type ManutencaoApi = {
+  placa: string;
+  status: "Aberta" | "Concluida";
+};
+
+type MotoCompleta = MotoApi & {
+  chassi: string;
+  latitude: number;
+  longitude: number;
+};
+
+const CHASSI_STORAGE_KEY = "@motos_chassi";
+const COORDS_STORAGE_KEY = "@motos_coords";
 const SAO_PAULO_COORDS = { latitude: -23.567776, longitude: -46.709247 };
 const RAIO_METROS = 10000;
 
 export default function Localizacao() {
-  const [motos, setMotos] = useState<any[]>([]);
-  const [motosFiltradas, setMotosFiltradas] = useState<any[]>([]);
-  const [selectedMoto, setSelectedMoto] = useState<any | null>(null);
+  const [motos, setMotos] = useState<MotoCompleta[]>([]);
+  const [selectedMoto, setSelectedMoto] = useState<MotoCompleta | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dropdownValue, setDropdownValue] = useState<string | null>(null);
   const [dropdownItems, setDropdownItems] = useState<any[]>([]);
-
   const mapRef = useRef<MapView | null>(null);
-
   const gerarCoordenadasAleatorias = (
     lat: number,
     lon: number,
@@ -46,49 +63,69 @@ export default function Localizacao() {
     const newLon = lon + dx / Math.cos((lat * Math.PI) / 180);
     return { latitude: newLat, longitude: newLon };
   };
-
   const carregarMotos = useCallback(async () => {
-    const dataMotos = await AsyncStorage.getItem("@motos");
-    const dataManut = await AsyncStorage.getItem("@manutencoes");
+    try {
+      const [motosResponse, manutencoesResponse, chassiData, coordsData] =
+        await Promise.all([
+          api.get("/Motos"),
+          api.get("/Manutencoes"),
+          AsyncStorage.getItem(CHASSI_STORAGE_KEY),
+          AsyncStorage.getItem(COORDS_STORAGE_KEY),
+        ]);
 
-    let listaMotos = dataMotos ? JSON.parse(dataMotos) : [];
-    const manutencoesPendentes = dataManut
-      ? JSON.parse(dataManut)
-          .filter((m: any) => m.status === "pendente")
-          .map((m: any) => m.moto)
-      : [];
+      const motosDaApi: MotoApi[] = motosResponse.data.items;
+      const manutencoesDaApi: ManutencaoApi[] = manutencoesResponse.data.items;
+      const chassiMap: Record<string, string> = chassiData
+        ? JSON.parse(chassiData)
+        : {};
+      const coordsMap: Record<string, { latitude: number; longitude: number }> =
+        coordsData ? JSON.parse(coordsData) : {};
 
-    listaMotos = listaMotos.filter((m: any) => {
-      const identificador = `${m.placa} | ${m.modelo}`;
-      return !manutencoesPendentes.includes(identificador);
-    });
+      const placasEmManutencao = new Set(
+        manutencoesDaApi
+          .filter((m) => m.status === "Aberta")
+          .map((m) => m.placa)
+      );
 
-    const comCoordenadas = listaMotos.map((moto: any) => ({
-      ...moto,
-      latitude:
-        moto.latitude ??
-        gerarCoordenadasAleatorias(
-          SAO_PAULO_COORDS.latitude,
-          SAO_PAULO_COORDS.longitude,
-          RAIO_METROS
-        ).latitude,
-      longitude:
-        moto.longitude ??
-        gerarCoordenadasAleatorias(
-          SAO_PAULO_COORDS.latitude,
-          SAO_PAULO_COORDS.longitude,
-          RAIO_METROS
-        ).longitude,
-    }));
+      const motosDisponiveis = motosDaApi.filter(
+        (moto) => !placasEmManutencao.has(moto.placa)
+      );
 
-    setMotos(comCoordenadas);
-    setMotosFiltradas(comCoordenadas);
-    setDropdownItems(
-      comCoordenadas.map((m: any) => ({
-        label: `${m.placa} | ${m.modelo}`,
-        value: `${m.placa} | ${m.modelo}`,
-      }))
-    );
+      const motosCompletas = motosDisponiveis.map((moto) => {
+        let coords = coordsMap[moto.placa];
+        if (!coords) {
+          coords = gerarCoordenadasAleatorias(
+            SAO_PAULO_COORDS.latitude,
+            SAO_PAULO_COORDS.longitude,
+            RAIO_METROS
+          );
+          coordsMap[moto.placa] = coords;
+        }
+
+        return {
+          ...moto,
+          chassi: chassiMap[moto.placa] || "N/A",
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        };
+      });
+
+      await AsyncStorage.setItem(COORDS_STORAGE_KEY, JSON.stringify(coordsMap));
+
+      setMotos(motosCompletas);
+      setDropdownItems(
+        motosCompletas.map((m) => ({
+          label: `${m.placa} | ${m.modelo}`,
+          value: `${m.placa} | ${m.modelo}`,
+        }))
+      );
+    } catch (error) {
+      console.error("Erro ao carregar motos para o mapa:", error);
+      Alert.alert(
+        "Erro de Conexão",
+        "Não foi possível carregar as motos disponíveis."
+      );
+    }
   }, []);
 
   useFocusEffect(
@@ -97,7 +134,7 @@ export default function Localizacao() {
     }, [carregarMotos])
   );
 
-  const abrirModal = (moto: any) => {
+  const abrirModal = (moto: MotoCompleta) => {
     setSelectedMoto(moto);
     setModalVisible(true);
   };
@@ -133,7 +170,7 @@ export default function Localizacao() {
               ? dropdownItems
               : [
                   {
-                    label: "Nenhuma moto encontrada",
+                    label: "Nenhuma moto disponível",
                     value: null,
                     disabled: true,
                   },
@@ -153,7 +190,6 @@ export default function Localizacao() {
                 },
                 1000
               );
-
               setTimeout(() => abrirModal(moto), 1000);
             }
           }}
@@ -162,8 +198,6 @@ export default function Localizacao() {
           dropDownDirection="BOTTOM"
           style={styles.dropdown}
           dropDownContainerStyle={styles.dropdownList}
-          textStyle={{ color: "black" }}
-          placeholderStyle={{ color: "#888" }}
           zIndex={10}
           zIndexInverse={9}
         />
@@ -180,7 +214,7 @@ export default function Localizacao() {
         scrollEnabled={!modalVisible}
         zoomEnabled={!modalVisible}
       >
-        {motosFiltradas.map((moto, index) => (
+        {motos.map((moto, index) => (
           <Marker
             key={index}
             coordinate={{
@@ -224,11 +258,11 @@ export default function Localizacao() {
                 </Text>
               </View>
               <View style={styles.desc}>
-                <Text style={styles.labelInfo}>Chassi (VIN)</Text>
+                <Text style={styles.labelInfo}>Ano:</Text>
                 <Text style={styles.inputInfo}>{selectedMoto?.ano}</Text>
               </View>
               <View style={styles.desc}>
-                <Text style={styles.labelInfo}>Ano:</Text>
+                <Text style={styles.labelInfo}>Chassi (VIN):</Text>
                 <Text style={styles.inputInfo}>{selectedMoto?.chassi}</Text>
               </View>
             </View>
