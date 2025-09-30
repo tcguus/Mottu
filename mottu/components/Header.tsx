@@ -11,18 +11,20 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import colors from "../constants/theme";
 import { useUser } from "../context/UserContext";
+import { useTheme } from "../context/ThemeContext";
+import { rawColors } from "@/constants/theme";
 
 type HeaderProps = {
   title?: string;
   showBackButton?: boolean;
 };
 
+
 export default function Header({ title, showBackButton = false }: HeaderProps) {
   const router = useRouter();
   const { user, signOut } = useUser();
-
+  const { theme, toggleTheme, colors } = useTheme();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
 
@@ -122,7 +124,7 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
       <Animated.View
         style={[
           styles.drawer,
-          { transform: [{ translateX: drawerTranslate }] },
+          { transform: [{ translateX: drawerTranslate }] }, {backgroundColor: colors.card}
         ]}
       >
         <TouchableOpacity onPress={toggleDrawer}>
@@ -130,17 +132,19 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
             <Ionicons
               name="chevron-forward-outline"
               size={24}
-              color={colors.branco}
+              color={colors.background}
             />
           </Animated.View>
         </TouchableOpacity>
 
         {user && (
           <View style={styles.drawerContent}>
-            <Text style={styles.drawerText}>Logado como:</Text>
-            <Text style={styles.drawerSubText}>
+            <Text style={[styles.drawerText, {color: colors.background}]}>Logado como:</Text>
+            <Text style={[styles.drawerSubText, {color: colors.background}]}>
               {user.nome} 
             </Text>
+            <View style={styles.teste}> 
+
             <TouchableOpacity
               onPress={handleLogout}
               style={styles.logoutButton}
@@ -148,10 +152,18 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
               <Ionicons
                 name="log-out-outline"
                 size={20}
-                color={colors.branco}
+                color={colors.background}
               />
-              <Text style={styles.logoutText}>Log Out</Text>
+              <Text style={[styles.logoutText, {color: colors.background}]}>Log Out</Text>
             </TouchableOpacity>
+            <TouchableOpacity onPress={toggleTheme} style={styles.actionButton}>
+          <Ionicons
+            name={theme === "light" ? "moon-outline" : "sunny-outline"}
+            size={26}
+            color={colors.background}
+          />
+        </TouchableOpacity>
+            </View>
           </View>
         )}
       </Animated.View>
@@ -163,7 +175,7 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
             <Ionicons
               name="chevron-forward-outline"
               size={24}
-              color={colors.branco}
+              color={colors.background}
             />
           </Animated.View>
         </TouchableOpacity>
@@ -184,7 +196,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 140,
-    backgroundColor: colors.verde,
+    backgroundColor: rawColors.verde,
     zIndex: 15,
     flexDirection: "row",
     alignItems: "center",
@@ -206,10 +218,10 @@ const styles = StyleSheet.create({
     left: 0,
     height: 88,
     width: 250,
-    backgroundColor: "#444",
+    backgroundColor: "#5",
     zIndex: 20,
     paddingLeft: 16,
-    paddingTop: 8,
+    paddingTop: 0,
     borderBottomRightRadius: 30,
     borderTopRightRadius: 30,
     borderBottomLeftRadius: 30,
@@ -220,16 +232,20 @@ const styles = StyleSheet.create({
   drawerContent: {
     flexDirection: "column",
     marginLeft: 12,
+    marginTop: 13,
+        gap: "4"
+
   },
   drawerText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: colors.branco,
+    color: rawColors.branco,
   },
   drawerSubText: {
     fontSize: 14,
-    color: colors.branco,
-    marginTop: 4,
+    color: rawColors.branco,
+    marginTop: -4,
+    marginBottom: 8,
   },
   fullOverlay: {
     position: "absolute",
@@ -247,7 +263,7 @@ const styles = StyleSheet.create({
     marginBottom: 9,
   },
   logoutText: {
-    color: colors.branco,
+    color: rawColors.branco,
     fontWeight: "bold",
     fontSize: 16,
     marginLeft: 8,
@@ -263,13 +279,23 @@ const styles = StyleSheet.create({
     height: 60,
     borderWidth: 6,
     borderColor: "#333",
-    borderTopColor: colors.verde,
+    borderTopColor: rawColors.verde,
     borderRadius: 30,
     marginBottom: 20,
   },
   loadingText: {
     fontSize: 18,
-    color: colors.branco,
+    color: rawColors.branco,
     fontWeight: "bold",
   },
+  actionButton: {
+    marginBottom: 4,
+  },
+  teste:{
+    marginTop: -15,
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: "70"
+  }
 });

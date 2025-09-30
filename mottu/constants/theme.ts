@@ -1,22 +1,30 @@
-const colors = {
+// Cores estáticas que nunca mudam
+export const rawColors = {
   verde: "#00B131",
-  preto: "#111111",
   branco: "#FFFFFF",
-  tintColorLight: "#007AFF",
-  tintColorDark: "#FFFFFF",
+  preto: "#000000",
+  cinzaClaro: "#888",
+  cinzaEscuro: "#2C2C2C",
+  textoEscuro: "#000",
+  textoClaro: "#E5E5E7",
 };
 
+// Conjunto de cores que mudam com o tema
 export const theme = {
   light: {
-    tint: colors.verde,
-    background: colors.branco,
-    text: colors.preto,
+    background: rawColors.branco,
+    text: rawColors.preto,
+    subtext: rawColors.cinzaClaro,
+    tint: rawColors.verde,
+    card: rawColors.cinzaEscuro,
+    border: rawColors.verde,
   },
   dark: {
-    tint: colors.tintColorDark,
-    background: colors.preto,
-    text: colors.branco,
+    background: rawColors.cinzaEscuro,
+    text: rawColors.branco,
+    subtext: rawColors.cinzaClaro,
+    tint: rawColors.verde,
+    card: rawColors.cinzaClaro,
+    border: rawColors.verde,
   },
 };
-
-export default colors;

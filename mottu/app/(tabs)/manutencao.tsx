@@ -12,11 +12,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
-import colors from "../../constants/theme";
 import Header from "../../components/Header";
 import { useFocusEffect } from "@react-navigation/native";
 import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { rawColors } from "@/constants/theme";
 
 type ManutencaoStatus = "Aberta" | "Concluida" | "excluido";
 
@@ -184,15 +184,15 @@ export default function ManutencaoScreen() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: colors.branco,
+          backgroundColor: rawColors.branco,
         }}
       >
         <Header title="Manutenção" showBackButton={true} />
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          <ActivityIndicator size="large" color={colors.verde} />
-          <Text style={{ marginTop: 10, color: colors.verde }}>
+          <ActivityIndicator size="large" color={rawColors.verde} />
+          <Text style={{ marginTop: 10, color: rawColors.verde }}>
             Carregando manutenções...
           </Text>
         </View>
@@ -288,7 +288,7 @@ export default function ManutencaoScreen() {
                   : "hourglass-outline"
               }
               size={22}
-              color={item.status === "excluido" ? "red" : colors.verde}
+              color={item.status === "excluido" ? "red" : rawColors.verde}
             />
           </TouchableOpacity>
         )}
@@ -348,7 +348,7 @@ export default function ManutencaoScreen() {
                   style={{
                     color:
                       manutencaoSelecionada?.status === "Concluida"
-                        ? colors.verde
+                        ? rawColors.verde
                         : "red",
                     fontWeight: "bold",
                     fontSize: 16,
@@ -367,7 +367,7 @@ export default function ManutencaoScreen() {
                   size={24}
                   color={
                     manutencaoSelecionada?.status === "Concluida"
-                      ? colors.verde
+                      ? rawColors.verde
                       : "red"
                   }
                   style={{ marginLeft: 6 }}
@@ -384,7 +384,7 @@ export default function ManutencaoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.branco,
+    backgroundColor: rawColors.branco,
     paddingTop: 140,
     alignItems: "center",
   },
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
   },
   inputBox: {
     borderWidth: 2,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderRadius: 12,
     padding: 10,
     width: "85%",
@@ -412,13 +412,13 @@ const styles = StyleSheet.create({
     height: 100,
     textAlignVertical: "top",
     borderWidth: 2,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderRadius: 12,
     padding: 10,
     width: "85%",
   },
   dropDown: {
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderWidth: 2,
     marginBottom: 10,
     width: "85%",
@@ -426,13 +426,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   dropDownContainer: {
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     width: "85%",
     alignSelf: "center",
     borderWidth: 2,
   },
   botao: {
-    backgroundColor: colors.verde,
+    backgroundColor: rawColors.verde,
     paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 14,
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     width: "85%",
     padding: 12,
     borderWidth: 2,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderRadius: 12,
     backgroundColor: "#fff",
   },
@@ -506,8 +506,8 @@ const styles = StyleSheet.create({
   confirmar: {
     fontSize: 14,
     fontWeight: "bold",
-    color: colors.branco,
-    backgroundColor: colors.verde,
+    color: rawColors.branco,
+    backgroundColor: rawColors.verde,
     padding: 8,
     borderRadius: 12,
     width: 150,
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
   excluir: {
     fontSize: 14,
     fontWeight: "bold",
-    color: colors.branco,
+    color: rawColors.branco,
     backgroundColor: "#fc0000",
     padding: 8,
     borderRadius: 12,
@@ -525,12 +525,12 @@ const styles = StyleSheet.create({
   },
   info: {
     width: "100%",
-    backgroundColor: colors.branco,
+    backgroundColor: rawColors.branco,
     gap: 12,
   },
   desc: {
     borderWidth: 2,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderRadius: 12,
     paddingTop: 4,
     paddingBottom: 4,

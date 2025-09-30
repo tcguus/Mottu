@@ -12,12 +12,14 @@ import {
   Easing,
   ActivityIndicator,
 } from "react-native";
-import colors, { theme } from "../constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useUser } from "../context/UserContext";
+import { rawColors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function LoginScreen() {
+  const { colors } = useTheme(); // <-- ADICIONE ESTA LINHA
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -62,11 +64,11 @@ export default function LoginScreen() {
           source={require("../assets/images/mottu-logo.png")}
           style={{ width: 120, height: 120, marginTop: 50 }}
         />
-        <View style={styles.whiteContainer}>
+        <View style={[styles.whiteContainer, { backgroundColor: colors.background }]}>
           <Text style={styles.title}>Log In</Text>
           <TextInput
             placeholder="Digite seu email"
-            placeholderTextColor={colors.verde}
+            placeholderTextColor={rawColors.verde}
             style={styles.input}
             value={email}
             onChangeText={setEmail}
@@ -76,7 +78,7 @@ export default function LoginScreen() {
           <View style={styles.passwordContainer}>
             <TextInput
               placeholder="Digite sua senha"
-              placeholderTextColor={theme.light.tint}
+              placeholderTextColor={rawColors.verde}
               style={styles.inputSenha}
               secureTextEntry={!showPassword}
               value={password}
@@ -89,7 +91,7 @@ export default function LoginScreen() {
               <Ionicons
                 name={showPassword ? "eye" : "eye-off"}
                 size={24}
-                color={theme.light.tint}
+                color={rawColors.verde}
               />
             </TouchableOpacity>
           </View>
@@ -99,9 +101,9 @@ export default function LoginScreen() {
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color={theme.light.background} />
+              <ActivityIndicator color={rawColors.branco} />
             ) : (
-              <Text style={styles.buttonText}>Entrar</Text>
+              <Text style={[styles.buttonText, { color: colors.background }]}>Entrar</Text>
             )}
           </TouchableOpacity>
 
@@ -140,14 +142,14 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   fullscreen: {
     flex: 1,
-    backgroundColor: theme.light.tint,
+    backgroundColor: rawColors.verde,
   },
   loginContainer: {
     flex: 1,
     alignItems: "center",
   },
   whiteContainer: {
-    backgroundColor: theme.light.background,
+
     borderBottomRightRadius: 170,
     borderTopLeftRadius: 170,
     width: "100%",
@@ -159,42 +161,45 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 60,
     fontWeight: "bold",
-    color: theme.light.tint,
+    color: rawColors.verde,
     marginBottom: 40,
   },
   input: {
     borderWidth: 2,
-    borderColor: theme.light.tint,
+    borderColor: rawColors.verde,
     borderRadius: 14,
     padding: 22,
     width: "65%",
-    color: theme.light.tint,
+    color: rawColors.verde,
     marginBottom: 20,
     fontWeight: "bold",
   },
   button: {
-    backgroundColor: theme.light.tint,
+    backgroundColor: rawColors.verde,
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 12,
     marginTop: 20,
-    marginBottom: 10,
-    minWidth: "65%",
-    height: 54,
-    justifyContent: "center",
-    alignItems: "center",
+    marginBottom: 80,
   },
   buttonText: {
-    color: theme.light.background,
+    color: rawColors.branco,
     fontWeight: "bold",
-    fontSize: 22,
+    fontSize: 24,
   },
   rodape: {
     fontSize: 12,
-    color: theme.light.tint,
+    color: rawColors.verde,
     position: "absolute",
     bottom: 100,
     fontWeight: "600",
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 2,
   },
   modalOverlay: {
     flex: 1,
@@ -203,25 +208,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: theme.light.background,
+    backgroundColor: rawColors.branco,
     padding: 24,
     borderRadius: 12,
     alignItems: "center",
     width: "80%",
     elevation: 5,
-    borderColor: theme.light.tint,
+    borderColor: rawColors.verde,
     borderWidth: 2,
   },
   bemVindo: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 12,
-    color: theme.light.tint,
+    color: rawColors.verde,
     textAlign: "center",
   },
   info: {
     fontSize: 16,
-    color: theme.light.text,
+    color: rawColors.preto,
     marginBottom: 14,
     fontWeight: "bold",
   },
@@ -232,16 +237,25 @@ const styles = StyleSheet.create({
   },
   inputSenha: {
     borderWidth: 2,
-    borderColor: theme.light.tint,
+    borderColor: rawColors.verde,
     borderRadius: 14,
     padding: 22,
     paddingRight: 50,
-    color: theme.light.tint,
+    color: rawColors.verde,
     fontWeight: "bold",
   },
   iconSenha: {
     position: "absolute",
     right: 16,
     top: "35%",
+  },
+  spinner: {
+    width: 60,
+    height: 60,
+    borderWidth: 6,
+    borderColor: "#333",
+    borderTopColor: rawColors.verde,
+    borderRadius: 30,
+    marginBottom: 20,
   },
 });

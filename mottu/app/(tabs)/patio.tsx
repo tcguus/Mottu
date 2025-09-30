@@ -13,9 +13,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import DropDownPicker from "react-native-dropdown-picker";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "../../components/Header";
-import colors from "../../constants/theme";
 import { useFocusEffect } from "@react-navigation/native";
 import api from "../../services/api";
+import { rawColors } from "@/constants/theme";
 
 type MotoApi = {
   placa: string;
@@ -145,7 +145,7 @@ export default function Patio() {
                   <Ionicons
                     name="construct"
                     size={14}
-                    color={colors.verde}
+                    color={rawColors.verde}
                     style={{ position: "absolute", top: 2, right: 2 }}
                   />
                 )}
@@ -199,9 +199,9 @@ export default function Patio() {
         contentContainerStyle={styles.scrollContent}
         renderItem={() => (
           <View style={styles.gridArea}>
-            {renderColuna(coluna1, colors.verde)}
+            {renderColuna(coluna1, rawColors.verde)}
             {renderColuna(manutencao, "yellow")}
-            {renderColuna(coluna3, colors.verde)}
+            {renderColuna(coluna3, rawColors.verde)}
           </View>
         )}
       />
@@ -262,13 +262,13 @@ const getImage = (modelo: string) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.branco,
+    backgroundColor: rawColors.branco,
     paddingTop: 160,
   },
   dropdown: {
     marginHorizontal: 20,
     marginBottom: 16,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderWidth: 2,
     borderRadius: 12,
     width: "90%",
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#eee",
     padding: 4,
     borderWidth: 2,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderRadius: 6,
     width: 90,
     minHeight: 600,
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: colors.branco,
+    backgroundColor: rawColors.branco,
     padding: 24,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
@@ -343,12 +343,12 @@ const styles = StyleSheet.create({
   },
   info: {
     width: "85%",
-    backgroundColor: colors.branco,
+    backgroundColor: rawColors.branco,
     gap: 12,
   },
   desc: {
     borderWidth: 2,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderRadius: 12,
     paddingTop: 2,
     paddingBottom: 2,
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   },
   infoProblema: {
     width: "85%",
-    backgroundColor: colors.branco,
+    backgroundColor: rawColors.branco,
     gap: 12,
     marginTop: 12,
   },

@@ -12,10 +12,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import colors from "../../constants/theme";
 import Header from "../../components/Header";
 import { Ionicons } from "@expo/vector-icons";
 import api from "../../services/api";
+import { rawColors } from "@/constants/theme";
+import { useTheme } from "../../context/ThemeContext";
 
 type ModeloType = "Pop" | "Sport" | "-E";
 type MotoType = {
@@ -33,6 +34,7 @@ const imagens: Record<ModeloType, any> = {
 };
 
 export default function CadastroMoto() {
+  const { colors } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [motos, setMotos] = useState<MotoType[]>([]);
   const [placa, setPlaca] = useState("");
@@ -145,19 +147,21 @@ export default function CadastroMoto() {
   if (isLoading) {
     return (
       <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: colors.branco,
-        }}
+        style={[
+          {
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          },
+          { backgroundColor: colors.background },
+        ]}
       >
         <Header title="Cadastre uma moto" showBackButton={true} />
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          <ActivityIndicator size="large" color={colors.verde} />
-          <Text style={{ marginTop: 10, color: colors.verde }}>
+          <ActivityIndicator size="large" color={rawColors.verde} />
+          <Text style={{ marginTop: 10, color: rawColors.verde }}>
             Carregando motos...
           </Text>
         </View>
@@ -171,25 +175,32 @@ export default function CadastroMoto() {
 
   if (motos.length > 0) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <Header title="Cadastre uma moto" showBackButton={true} />
-        <View style={styles.searchContainer}>
+        <View
+          style={[
+            styles.searchContainer,
+            { backgroundColor: colors.background },
+          ]}
+        >
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.text }]}
             placeholder="Procurar por placa..."
-            placeholderTextColor="#888"
+            placeholderTextColor={colors.text}
             value={search}
             onChangeText={setSearch}
           />
           <Ionicons
             name="search-outline"
             size={22}
-            color={colors.verde}
+            color={rawColors.verde}
             style={styles.searchIcon}
           />
         </View>
 
-        <Text style={styles.title}>Motos cadastradas</Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          Motos cadastradas
+        </Text>
         <FlatList
           data={motosFiltradas}
           keyExtractor={(item) => item.placa}
@@ -197,18 +208,21 @@ export default function CadastroMoto() {
           contentContainerStyle={{ paddingBottom: 100 }}
           ListEmptyComponent={() => (
             <Text
-              style={{
-                marginTop: 16,
-                color: "#888",
-                fontWeight: "bold",
-                textAlign: "center",
-              }}
+              style={[
+                {
+                  marginTop: 16,
+                  color: "#888",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                },
+                { color: colors.text },
+              ]}
             >
               Nenhuma moto encontrada
             </Text>
           )}
           renderItem={({ item }) => (
-            <View style={styles.card}>
+            <View style={[styles.card, { backgroundColor: colors.background }]}>
               <View style={styles.cardHeader}>
                 <Text style={styles.modelo}>{item.modelo}</Text>
                 <TouchableOpacity
@@ -221,18 +235,32 @@ export default function CadastroMoto() {
                 </TouchableOpacity>
               </View>
               <View style={styles.infos}>
-                <View style={styles.info}>
+                <View
+                  style={[styles.info, { backgroundColor: colors.background }]}
+                >
                   <View style={styles.desc}>
-                    <Text style={styles.labelInfo}>Placa</Text>
-                    <Text style={styles.inputInfo}>{item.placa}</Text>
+                    <Text style={[styles.labelInfo, { color: colors.text }]}>
+                      Placa
+                    </Text>
+                    <Text style={[styles.inputInfo, { color: colors.subtext }]}>
+                      {item.placa}
+                    </Text>
                   </View>
                   <View style={styles.desc}>
-                    <Text style={styles.labelInfo}>Ano</Text>
-                    <Text style={styles.inputInfo}>{item.ano}</Text>
+                    <Text style={[styles.labelInfo, { color: colors.text }]}>
+                      Ano
+                    </Text>
+                    <Text style={[styles.inputInfo, { color: colors.subtext }]}>
+                      {item.ano}
+                    </Text>
                   </View>
                   <View style={styles.desc}>
-                    <Text style={styles.labelInfo}>Chassi (VIN)</Text>
-                    <Text style={styles.inputInfo}>{item.chassi}</Text>
+                    <Text style={[styles.labelInfo, { color: colors.text }]}>
+                      Chassi (VIN)
+                    </Text>
+                    <Text style={[styles.inputInfo, { color: colors.subtext }]}>
+                      {item.chassi}
+                    </Text>
                   </View>
                 </View>
                 <Image
@@ -251,7 +279,12 @@ export default function CadastroMoto() {
           onRequestClose={() => setConfirmVisible(false)}
         >
           <View style={styles.modallOverlay}>
-            <View style={styles.modallContent}>
+            <View
+              style={[
+                styles.modallContent,
+                { backgroundColor: colors.background },
+              ]}
+            >
               <Text style={styles.bemVindo}>
                 Tem certeza que deseja excluir?
               </Text>
@@ -265,7 +298,7 @@ export default function CadastroMoto() {
                   <Ionicons
                     name="checkmark-circle"
                     size={48}
-                    color={colors.verde}
+                    color={rawColors.verde}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setConfirmVisible(false)}>
@@ -279,7 +312,7 @@ export default function CadastroMoto() {
           style={styles.addButton}
           onPress={() => setModalVisible(true)}
         >
-          <Text style={styles.addButtonText}>+</Text>
+          <Text style={[styles.addButtonText, { color: colors.background }]}>+</Text>
         </TouchableOpacity>
         <Modal
           visible={modalVisible}
@@ -288,28 +321,47 @@ export default function CadastroMoto() {
           onRequestClose={() => setModalVisible(false)}
         >
           <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
+            <View
+              style={[
+                styles.modalContent,
+                { backgroundColor: colors.background },
+              ]}
+            >
               <TouchableOpacity
                 style={styles.closeIcon}
                 onPress={() => setModalVisible(false)}
               >
                 <Ionicons name="close" size={28} color="#999" />
               </TouchableOpacity>
-              <Text style={styles.title}>Cadastre uma moto</Text>
-              <View style={styles.modeloContainer}>
+              <Text style={[styles.title, { color: colors.text }]}>
+                Cadastre uma moto
+              </Text>
+              <View
+                style={[
+                  styles.modeloContainer,
+                  { backgroundColor: colors.background },
+                ]}
+              >
                 {["Pop", "Sport", "-E"].map((item) => (
                   <TouchableOpacity
                     key={item}
                     onPress={() => setModelo(item as ModeloType)}
                     style={[
                       styles.modeloButton,
-                      modelo === item && styles.modeloButtonSelected,
+                      {
+                        borderColor: colors.border,
+                        backgroundColor:
+                          modelo === item ? colors.tint : "transparent",
+                      },
                     ]}
                   >
                     <Text
                       style={[
                         styles.modeloButtonText,
-                        modelo === item && styles.modeloButtonTextSelected,
+                        {
+                          color:
+                            modelo === item ? colors.background : colors.tint,
+                        },
                       ]}
                     >
                       {item}
@@ -323,9 +375,11 @@ export default function CadastroMoto() {
                 resizeMode="contain"
               />
               <View style={styles.inputt}>
-                <Text style={styles.label}>Placa</Text>
+                <Text style={[styles.labelInfo, { color: colors.text }]}>
+                  Placa
+                </Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.subtext }]}
                   placeholder="ABC-1234"
                   placeholderTextColor={"#888"}
                   value={placa}
@@ -343,9 +397,11 @@ export default function CadastroMoto() {
                 />
               </View>
               <View style={styles.inputt}>
-                <Text style={styles.label}>Ano</Text>
+                <Text style={[styles.labelInfo, { color: colors.text }]}>
+                  Ano
+                </Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.subtext }]}
                   maxLength={4}
                   placeholder="2020-2025"
                   placeholderTextColor={"#888"}
@@ -355,9 +411,11 @@ export default function CadastroMoto() {
                 />
               </View>
               <View style={styles.inputt}>
-                <Text style={styles.label}>Chassi (VIN)</Text>
+                <Text style={[styles.labelInfo, { color: colors.text }]}>
+                  Chassi (VIN)
+                </Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: colors.subtext }]}
                   maxLength={17}
                   placeholder="0AA000AA00A000000"
                   placeholderTextColor={"#888"}
@@ -369,7 +427,9 @@ export default function CadastroMoto() {
                 onPress={adicionarMoto}
                 style={styles.botaoCadastrar}
               >
-                <Text style={styles.botaoTexto}>Cadastrar</Text>
+                <Text style={[styles.botaoTexto, { color: colors.background }]}>
+                  Cadastrar
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -379,9 +439,11 @@ export default function CadastroMoto() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title="Cadastre uma moto" showBackButton={true} />
-      <Text style={styles.title}>Cadastre uma moto</Text>
+      <Text style={[styles.title, { color: colors.text }]}>
+        Cadastre uma moto
+      </Text>
       <View style={styles.modeloContainer}>
         {["Pop", "Sport", "-E"].map((item) => (
           <TouchableOpacity
@@ -389,13 +451,18 @@ export default function CadastroMoto() {
             onPress={() => setModelo(item as ModeloType)}
             style={[
               styles.modeloButton,
-              modelo === item && styles.modeloButtonSelected,
+              {
+                borderColor: colors.border,
+                backgroundColor: modelo === item ? colors.tint : "transparent",
+              },
             ]}
           >
             <Text
               style={[
                 styles.modeloButtonText,
-                modelo === item && styles.modeloButtonTextSelected,
+                {
+                  color: modelo === item ? colors.background : colors.tint,
+                },
               ]}
             >
               {item}
@@ -410,9 +477,9 @@ export default function CadastroMoto() {
       />
       <View style={styles.inputGroup}>
         <View style={styles.inputt}>
-          <Text style={styles.label}>Placa</Text>
+          <Text style={[styles.labelInfo, { color: colors.text }]}>Placa</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.subtext }]}
             placeholder="ABC-1234"
             placeholderTextColor={"#888"}
             value={placa}
@@ -427,9 +494,9 @@ export default function CadastroMoto() {
           />
         </View>
         <View style={styles.inputt}>
-          <Text style={styles.label}>Ano</Text>
+          <Text style={[styles.labelInfo, { color: colors.text }]}>Ano</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.subtext }]}
             maxLength={4}
             placeholder="2020-2025"
             placeholderTextColor={"#888"}
@@ -439,9 +506,11 @@ export default function CadastroMoto() {
           />
         </View>
         <View style={styles.inputt}>
-          <Text style={styles.label}>Chassi (VIN)</Text>
+          <Text style={[styles.labelInfo, { color: colors.text }]}>
+            Chassi (VIN)
+          </Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.subtext }]}
             maxLength={17}
             placeholder="0AA000AA00A000000"
             placeholderTextColor={"#888"}
@@ -451,7 +520,9 @@ export default function CadastroMoto() {
         </View>
       </View>
       <TouchableOpacity onPress={adicionarMoto} style={styles.botaoCadastrar}>
-        <Text style={styles.botaoTexto}>Cadastrar</Text>
+        <Text style={[styles.botaoTexto, { color: colors.background }]}>
+          Cadastrar
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -460,7 +531,7 @@ export default function CadastroMoto() {
 const styles = StyleSheet.create({
   inputt: {
     borderWidth: 2,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderRadius: 12,
     paddingTop: 6,
     paddingBottom: 6,
@@ -484,7 +555,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: colors.branco,
+    backgroundColor: rawColors.branco,
     paddingTop: 140,
     alignItems: "center",
   },
@@ -500,7 +571,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   modeloButton: {
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderWidth: 2,
     borderRadius: 20,
     paddingHorizontal: 16,
@@ -509,15 +580,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modeloButtonSelected: {
-    backgroundColor: colors.verde,
+    backgroundColor: rawColors.verde,
   },
   modeloButtonText: {
-    color: colors.verde,
+    color: rawColors.verde,
     fontWeight: "600",
     fontSize: 24,
   },
   modeloButtonTextSelected: {
-    color: colors.branco,
+    color: rawColors.branco,
   },
   imagemMoto: {
     width: "50%",
@@ -531,24 +602,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   botaoCadastrar: {
-    backgroundColor: colors.verde,
+    backgroundColor: rawColors.verde,
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 16,
     marginTop: 20,
   },
   botaoTexto: {
-    color: colors.branco,
+    color: rawColors.branco,
     fontWeight: "bold",
     fontSize: 18,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.branco,
+    backgroundColor: rawColors.branco,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     paddingHorizontal: 12,
     paddingVertical: 6,
     width: "60%",
@@ -564,7 +635,7 @@ const styles = StyleSheet.create({
   },
   card: {
     borderWidth: 3,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderRadius: 20,
     padding: 16,
     marginBottom: 12,
@@ -574,7 +645,7 @@ const styles = StyleSheet.create({
   modelo: {
     fontSize: 22,
     fontWeight: "bold",
-    color: colors.verde,
+    color: rawColors.verde,
     alignSelf: "flex-start",
     marginBottom: -8,
   },
@@ -582,7 +653,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 90,
     right: 24,
-    backgroundColor: colors.verde,
+    backgroundColor: rawColors.verde,
     width: 40,
     height: 40,
     borderRadius: 10,
@@ -591,7 +662,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   addButtonText: {
-    color: colors.branco,
+    color: rawColors.branco,
     fontSize: 36,
     fontWeight: "bold",
     marginTop: -5,
@@ -611,7 +682,7 @@ const styles = StyleSheet.create({
   },
   inputField: {
     borderWidth: 2,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderRadius: 12,
     padding: 10,
     width: "100%",
@@ -643,12 +714,12 @@ const styles = StyleSheet.create({
   },
   info: {
     width: "50%",
-    backgroundColor: colors.branco,
+    backgroundColor: rawColors.branco,
     gap: 12,
   },
   desc: {
     borderWidth: 2,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderRadius: 12,
     paddingTop: 2,
     paddingBottom: 2,
@@ -675,20 +746,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modallContent: {
-    backgroundColor: colors.branco,
+    backgroundColor: rawColors.branco,
     padding: 24,
     borderRadius: 12,
     alignItems: "center",
     width: "80%",
     elevation: 5,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderWidth: 2,
   },
   bemVindo: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 12,
-    color: colors.verde,
+    color: rawColors.verde,
     textAlign: "center",
   },
   closeIcon: {

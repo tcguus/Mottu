@@ -13,9 +13,9 @@ import DropDownPicker from "react-native-dropdown-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "../../components/Header";
-import colors from "../../constants/theme";
 import { useFocusEffect } from "@react-navigation/native";
 import api from "../../services/api";
+import { rawColors } from "@/constants/theme";
 
 type MotoApi = {
   placa: string;
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     width: "90%",
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderWidth: 2,
     borderRadius: 12,
     marginTop: 60,
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   },
   dropdownList: {
     width: "90%",
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderWidth: 1,
     borderRadius: 12,
     marginTop: 60,
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
   },
   modalContent: {
-    backgroundColor: colors.branco,
+    backgroundColor: rawColors.branco,
     paddingHorizontal: 24,
     paddingBottom: 24,
     paddingTop: 36,
@@ -319,12 +319,12 @@ const styles = StyleSheet.create({
   },
   info: {
     width: "85%",
-    backgroundColor: colors.branco,
+    backgroundColor: rawColors.branco,
     gap: 12,
   },
   desc: {
     borderWidth: 2,
-    borderColor: colors.verde,
+    borderColor: rawColors.verde,
     borderRadius: 12,
     paddingTop: 2,
     paddingBottom: 2,

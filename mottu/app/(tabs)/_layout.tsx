@@ -1,19 +1,22 @@
 import { Tabs } from "expo-router";
-import colors from "../../constants/theme";
 import MotoIcon from "../../components/icons/MotoIcon";
 import PatioIcon from "../../components/icons/PatioIcon";
 import ManutencaoIcon from "../../components/icons/ManutencaoIcon";
 import LocalizacaoIcon from "../../components/icons/LocalizacaoIcon";
 import React from "react";
 import { View } from "react-native";
+import { rawColors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext"; // 1. Importe o useTheme
 
 export default function TabLayout() {
+  const { colors } = useTheme(); // 2. Pegue as cores dinâmicas do tema
+
   return (
     <Tabs
       screenOptions={{
         tabBarShowLabel: false,
         tabBarStyle: {
-          backgroundColor: colors.verde,
+          backgroundColor: rawColors.verde, // O fundo da TabBar é sempre verde
           borderRadius: 30,
           height: 60,
           width: "90%",
@@ -33,7 +36,7 @@ export default function TabLayout() {
         options={{
           tabBarIcon: ({ focused }: { focused: boolean }) => (
             <IconWrapper focused={focused}>
-              <MotoIcon color="#FFF" />
+              <MotoIcon color={colors.background} />
             </IconWrapper>
           ),
         }}
@@ -43,7 +46,7 @@ export default function TabLayout() {
         options={{
           tabBarIcon: ({ focused }: { focused: boolean }) => (
             <IconWrapper focused={focused}>
-              <ManutencaoIcon color="#FFF" />
+              <ManutencaoIcon color={colors.background} />
             </IconWrapper>
           ),
         }}
@@ -53,7 +56,7 @@ export default function TabLayout() {
         options={{
           tabBarIcon: ({ focused }: { focused: boolean }) => (
             <IconWrapper focused={focused}>
-              <PatioIcon color="#FFF" />
+              <PatioIcon color={colors.background} />
             </IconWrapper>
           ),
         }}
@@ -63,7 +66,7 @@ export default function TabLayout() {
         options={{
           tabBarIcon: ({ focused }: { focused: boolean }) => (
             <IconWrapper focused={focused}>
-              <LocalizacaoIcon color="#FFF" />
+              <LocalizacaoIcon color={colors.background} />
             </IconWrapper>
           ),
         }}
