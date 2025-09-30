@@ -45,7 +45,7 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View style={[styles.container, {backgroundColor: colors.background}]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={styles.title}>Criar Conta</Text>
 
       <TextInput
@@ -93,7 +93,9 @@ export default function RegisterScreen() {
         {isLoading ? (
           <ActivityIndicator color="#FFF" />
         ) : (
-          <Text style={[styles.buttonText, {color: colors.background}]}>Cadastrar</Text>
+          <Text style={[styles.buttonText, { color: colors.background }]}>
+            Cadastrar
+          </Text>
         )}
       </TouchableOpacity>
 
@@ -114,7 +116,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 24,
     alignItems: "center",
-    backgroundColor: "#"
+    backgroundColor: "#",
   },
   title: {
     fontSize: 40,

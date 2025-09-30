@@ -1,11 +1,10 @@
 import { Stack } from "expo-router";
 import { UserProvider } from "../context/UserContext";
 import { ThemeProvider } from "../context/ThemeContext";
-import React from 'react'; // 1. Importe o ThemeProvider
+import React from "react";
 
 export default function RootLayout() {
   return (
-    // 2. Envolva o UserProvider (e tudo mais) com o ThemeProvider
     <ThemeProvider>
       <UserProvider>
         <Stack screenOptions={{ headerShown: false }}>

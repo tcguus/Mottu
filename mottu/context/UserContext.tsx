@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter, useSegments } from "expo-router";
 import api from "../services/api";
-import { jwtDecode } from "jwt-decode"; 
+import { jwtDecode } from "jwt-decode";
 
 interface User {
   id: string;
@@ -33,8 +33,8 @@ const getUserFromToken = (token: string): User | null => {
     const decoded: any = jwtDecode(token);
     return {
       id: decoded.uid,
-      nome: decoded.nome, 
-      email: decoded.email, 
+      nome: decoded.nome,
+      email: decoded.email,
     };
   } catch (e) {
     console.error("Token inválido ou expirado:", e);
@@ -91,7 +91,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const userData = getUserFromToken(newToken);
 
       if (userData) {
-        setUser(userData); 
+        setUser(userData);
       }
 
       setToken(newToken);

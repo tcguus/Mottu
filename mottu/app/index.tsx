@@ -19,7 +19,7 @@ import { rawColors } from "@/constants/theme";
 import { useTheme } from "@/context/ThemeContext";
 
 export default function LoginScreen() {
-  const { colors } = useTheme(); 
+  const { colors } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

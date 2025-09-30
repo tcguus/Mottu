@@ -1,13 +1,13 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useColorScheme } from "react-native";
-import { theme as appTheme } from "../constants/theme"; // Importa as nossas cores
+import { theme as appTheme } from "../constants/theme"; 
 
 type Theme = "light" | "dark";
 
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
-  colors: typeof appTheme.light; // Expõe as cores do tema atual
+  colors: typeof appTheme.light; 
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);

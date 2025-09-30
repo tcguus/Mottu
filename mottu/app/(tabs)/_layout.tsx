@@ -6,16 +6,16 @@ import LocalizacaoIcon from "../../components/icons/LocalizacaoIcon";
 import React from "react";
 import { View } from "react-native";
 import { rawColors } from "@/constants/theme";
-import { useTheme } from "@/context/ThemeContext"; 
+import { useTheme } from "@/context/ThemeContext";
 export default function TabLayout() {
-  const { colors } = useTheme(); 
+  const { colors } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
         tabBarShowLabel: false,
         tabBarStyle: {
-          backgroundColor: rawColors.verde, 
+          backgroundColor: rawColors.verde,
           borderRadius: 30,
           height: 60,
           width: "90%",

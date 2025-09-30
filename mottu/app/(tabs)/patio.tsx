@@ -194,7 +194,7 @@ export default function Patio() {
           styles.dropdownList,
           { backgroundColor: colors.background },
         ]}
-        zIndex={10}
+        zIndex={1}
         zIndexInverse={9}
         textStyle={{
           color: colors.text,
@@ -280,10 +280,19 @@ export default function Patio() {
             </View>
 
             {selectedMoto?.emManutencao && (
-              <View style={styles.infoProblema}>
-                <View style={styles.desc}>
-                  <Text style={styles.labelInfo}>Manutenção em Aberto:</Text>
-                  <Text style={styles.inputInfo}>
+              <View
+                style={[
+                  styles.infoProblema,
+                  { backgroundColor: colors.background },
+                ]}
+              >
+                <View
+                  style={[styles.desc, { backgroundColor: colors.background }]}
+                >
+                  <Text style={[styles.labelInfo, { color: colors.text }]}>
+                    Manutenção em Aberto:
+                  </Text>
+                  <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                     {selectedMoto.tipoManutencao}
                   </Text>
                 </View>

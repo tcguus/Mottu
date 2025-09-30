@@ -16,7 +16,8 @@ import Header from "../../components/Header";
 import { useFocusEffect } from "@react-navigation/native";
 import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { rawColors } from "@/constants/theme";
+import { rawColors } from "../../constants/theme";
+import { useTheme } from "../../context/ThemeContext";
 
 type ManutencaoStatus = "Aberta" | "Concluida" | "excluido";
 
@@ -31,6 +32,7 @@ type Manutencao = {
 const EXCLUIDAS_STORAGE_KEY = "@manutencoes_excluidas";
 
 export default function ManutencaoScreen() {
+  const { colors } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [manutencoes, setManutencoes] = useState<Manutencao[]>([]);
   const [descricao, setDescricao] = useState("");
@@ -184,12 +186,17 @@ export default function ManutencaoScreen() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: rawColors.branco,
+          backgroundColor: colors.background,
         }}
       >
         <Header title="Manutenção" showBackButton={true} />
         <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: colors.background,
+          }}
         >
           <ActivityIndicator size="large" color={rawColors.verde} />
           <Text style={{ marginTop: 10, color: rawColors.verde }}>
@@ -201,20 +208,34 @@ export default function ManutencaoScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header title="Manutenção" showBackButton={true} />
 
       <FlatList
         style={{ width: "100%", maxHeight: "90%" }}
         ListHeaderComponent={
-          <View style={{ alignItems: "center", zIndex: 1000 }}>
-            <Text style={styles.title}>Cadastrar Manutenção</Text>
-            <Text style={styles.label}>Data (Automática)</Text>
+          <View
+            style={{
+              alignItems: "center",
+              zIndex: 1000,
+              backgroundColor: colors.background,
+            }}
+          >
+            <Text style={[styles.title, { color: colors.text }]}>
+              Cadastrar Manutenção
+            </Text>
+            <Text style={[styles.label, { color: colors.text }]}>
+              Data (Automática)
+            </Text>
             <View style={styles.inputBox}>
-              <Text>{new Date().toLocaleDateString("pt-BR")}</Text>
+              <Text style={{ color: colors.subtext }}>
+                {new Date().toLocaleDateString("pt-BR")}
+              </Text>
             </View>
 
-            <Text style={styles.label}>Escolha uma moto</Text>
+            <Text style={[styles.label, { color: colors.text }]}>
+              Escolha uma moto
+            </Text>
             <DropDownPicker
               open={openMoto}
               value={motoSelecionada}
@@ -223,12 +244,47 @@ export default function ManutencaoScreen() {
               setValue={setMotoSelecionada}
               setItems={setListaMotos}
               placeholder="Selecione uma moto"
-              style={styles.dropDown}
-              dropDownContainerStyle={styles.dropDownContainer}
+              style={[styles.dropDown, { backgroundColor: colors.background }]}
+              dropDownContainerStyle={[
+                styles.dropDownContainer,
+                { backgroundColor: colors.background },
+              ]}
               zIndex={3000}
               zIndexInverse={1000}
+              textStyle={{
+                color: colors.text,
+              }}
+              placeholderStyle={{
+                color: colors.text,
+              }}
+              ArrowDownIconComponent={({ style }) => (
+                <Ionicons
+                  name="chevron-down"
+                  size={20}
+                  color={colors.text}
+                  styles={style}
+                />
+              )}
+              ArrowUpIconComponent={({ style }) => (
+                <Ionicons
+                  name="chevron-up"
+                  size={20}
+                  color={colors.text}
+                  styles={style}
+                />
+              )}
+              TickIconComponent={({ style }) => (
+                <Ionicons
+                  name="checkmark"
+                  size={20}
+                  color={colors.text}
+                  styles={style}
+                />
+              )}
             />
-            <Text style={styles.label}>Tipo de Manutenção</Text>
+            <Text style={[styles.label, { color: colors.text }]}>
+              Tipo de Manutenção
+            </Text>
             <DropDownPicker
               open={openTipo}
               value={tipo}
@@ -237,28 +293,67 @@ export default function ManutencaoScreen() {
               setValue={setTipo}
               setItems={setTipos}
               placeholder="Selecione um tipo"
-              style={styles.dropDown}
-              dropDownContainerStyle={styles.dropDownContainer}
+              style={[styles.dropDown, { backgroundColor: colors.background }]}
+              dropDownContainerStyle={[
+                styles.dropDownContainer,
+                { backgroundColor: colors.background },
+              ]}
               zIndex={2000}
               zIndexInverse={2000}
+              textStyle={{
+                color: colors.text,
+              }}
+              placeholderStyle={{
+                color: colors.text,
+              }}
+              ArrowDownIconComponent={({ style }) => (
+                <Ionicons
+                  name="chevron-down"
+                  size={20}
+                  color={colors.text}
+                  styles={style}
+                />
+              )}
+              ArrowUpIconComponent={({ style }) => (
+                <Ionicons
+                  name="chevron-up"
+                  size={20}
+                  color={colors.text}
+                  styles={style}
+                />
+              )}
+              TickIconComponent={({ style }) => (
+                <Ionicons
+                  name="checkmark"
+                  size={20}
+                  color={colors.text}
+                  styles={style}
+                />
+              )}
             />
-            <Text style={styles.label}>Descrição (Opcional)</Text>
+            <Text style={[styles.label, { color: colors.text }]}>
+              Descrição (Opcional)
+            </Text>
             <TextInput
               multiline
               numberOfLines={4}
               value={descricao}
               onChangeText={setDescricao}
               placeholder="Descreva o problema..."
-              placeholderTextColor={"#888"}
-              style={styles.descricao}
+              placeholderTextColor={colors.subtext}
+              style={[styles.descricao, { color: colors.text }]}
             />
             <TouchableOpacity style={styles.botao} onPress={salvarManutencao}>
-              <Text style={styles.botaoTexto}>Cadastrar</Text>
+              <Text style={[styles.botaoTexto, { color: colors.background }]}>
+                Cadastrar
+              </Text>
             </TouchableOpacity>
-            <Text style={styles.historico}>Histórico</Text>
+            <Text style={[styles.historico, { color: colors.text }]}>
+              Histórico
+            </Text>
 
             {manutencoes.length === 0 && (
-              <Text style={{ color: "#888", marginTop: 10 }}>
+              <Text style={{ color: colors.subtext, marginTop: 10 }}>
                 Nenhuma manutenção registrada
               </Text>
             )}
@@ -273,11 +368,15 @@ export default function ManutencaoScreen() {
               setManutencaoSelecionada(item);
               setModalVisible(true);
             }}
-            style={styles.card}
+            style={[styles.card, { backgroundColor: colors.background }]}
           >
-            <View style={styles.cardLeft}>
-              <Text style={styles.cardTitulo}>{item.placa}</Text>
-              <Text>{item.problemas}</Text>
+            <View
+              style={[styles.cardLeft, { backgroundColor: colors.background }]}
+            >
+              <Text style={[styles.cardTitulo, { color: colors.text }]}>
+                {item.placa}
+              </Text>
+              <Text style={{ color: colors.text }}>{item.problemas}</Text>
             </View>
             <Ionicons
               name={
@@ -295,18 +394,27 @@ export default function ManutencaoScreen() {
       />
       <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.overlay}>
-          <View style={styles.modalContent}>
+          <View
+            style={[
+              styles.modalContent,
+              { backgroundColor: colors.background },
+            ]}
+          >
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setModalVisible(false)}
             >
               <Ionicons name="close" size={24} color="#888" />
             </TouchableOpacity>
-            <Text style={styles.modalTitle}>Detalhes da Manutenção</Text>
-            <View style={styles.info}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              Detalhes da Manutenção
+            </Text>
+            <View style={[styles.info, { backgroundColor: colors.background }]}>
               <View style={styles.desc}>
-                <Text style={styles.labelInfo}>Data:</Text>
-                <Text style={styles.inputInfo}>
+                <Text style={[styles.labelInfo, { color: colors.text }]}>
+                  Data:
+                </Text>
+                <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                   {manutencaoSelecionada?.data
                     ? new Date(manutencaoSelecionada.data).toLocaleDateString(
                         "pt-BR"
@@ -315,14 +423,18 @@ export default function ManutencaoScreen() {
                 </Text>
               </View>
               <View style={styles.desc}>
-                <Text style={styles.labelInfo}>Moto (Placa):</Text>
-                <Text style={styles.inputInfo}>
+                <Text style={[styles.labelInfo, { color: colors.text }]}>
+                  Moto (Placa):
+                </Text>
+                <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                   {manutencaoSelecionada?.placa}
                 </Text>
               </View>
               <View style={styles.desc}>
-                <Text style={styles.labelInfo}>Problemas:</Text>
-                <Text style={styles.inputInfo}>
+                <Text style={[styles.labelInfo, { color: colors.text }]}>
+                  Problemas:
+                </Text>
+                <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                   {manutencaoSelecionada?.problemas}
                 </Text>
               </View>
@@ -330,10 +442,16 @@ export default function ManutencaoScreen() {
             {manutencaoSelecionada?.status === "Aberta" ? (
               <View style={{ flexDirection: "row", gap: 20, marginTop: 20 }}>
                 <TouchableOpacity onPress={concluirManutencao}>
-                  <Text style={styles.confirmar}>Concluir Manutenção</Text>
+                  <Text
+                    style={[styles.confirmar, { color: colors.background }]}
+                  >
+                    Concluir Manutenção
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={excluirManutencao}>
-                  <Text style={styles.excluir}>Excluir Manutenção</Text>
+                  <Text style={[styles.excluir, { color: colors.background }]}>
+                    Excluir Manutenção
+                  </Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -451,6 +569,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     paddingTop: 20,
     width: "85%",
+    textAlign: "center",
   },
   title: {
     fontSize: 26,
