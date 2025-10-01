@@ -76,7 +76,48 @@ A estrutura de pastas do projeto foi organizada de maneira clara para separar as
 
 ---
 
-## Como Executar o projeto
+## Configuração do Ambiente de Desenvolvimento
+
+Para que o aplicativo mobile funcione corretamente, é essencial que a API backend (.NET) esteja em execução na sua máquina local e que o aplicativo saiba como se conectar a ela.
+
+### Passo 1: Executar a API Backend
+
+1.  Clone o repositório da API a partir do seguinte link: `https://github.com/tcguus/Mottu-API`
+2.  Abra o projeto da API utilizando a IDE JetBrains Rider.
+3.  Execute o projeto. Por padrão, a API irá rodar na porta `5075`.
+
+### Passo 2: Configurar a Conexão no App Mobile
+
+O aplicativo precisa saber o endereço de IP da sua máquina na rede local para se comunicar com a API.
+
+1.  **Encontre o seu Endereço IPv4:**
+    * Abra o **Prompt de Comando (cmd)** no seu Windows.
+    * Digite o comando `ipconfig` e pressione Enter.
+    * Procure pela sua conexão de rede (geralmente "Adaptador de LAN sem Fio Wi-Fi") e anote o valor do **"Endereço IPv4"**. Ele será algo como `192.168.1.10`.
+
+2.  **Atualize o Ficheiro de Configuração da API:**
+    * No projeto do aplicativo mobile, abra o ficheiro: `services/api.ts`.
+    * Encontre a linha que define a `const API_URL`.
+    * Substitua o endereço de IP existente pelo **Endereço IPv4** que você anotou, mantendo a porta `:5075`.
+
+    **Exemplo:**
+    ```typescript
+    // Mude de:
+    const API_URL = "[http://12.34.567.890:5075/api/v1]";
+
+    // Para (usando o seu IP):
+    const API_URL = "[http://192.168.1.10:5075/api/v1]";
+    ```
+
+Após seguir estes passos, a API estará a rodar e o aplicativo mobile estará configurado para se conectar a ela.
+
+## Como Executar o Projeto
+
+**Pré-requisitos:**
+* Node.js e npm/yarn instalados.
+* Aplicação Expo Go instalada no seu telemóvel (Android/iOS) ou um emulador configurado.
+* A API Backend deve estar em execução conforme as instruções acima.
+
 
 **Passos**:
 
