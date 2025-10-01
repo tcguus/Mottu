@@ -76,17 +76,28 @@ A estrutura de pastas do projeto foi organizada de maneira clara para separar as
 
 ---
 
-## Comandos Úteis
+## Como Executar o projeto
 
-### Rodar o projeto
+**Passos**:
+
+1) Clone o repositório e acesse a pasta do projeto:
+```bash
+git clone https://github.com/tcguus/Mottu
+cd mottu
+```
+
+2) Instale o npm:
 ```bash
 npm install
 ```
 
+3) Rode o projeto:
 ```bash
-npx expo start
+npx expo start 
 ```
 
+4) Acesse o projeto:  
+`http://localhost:3000`
 ---
 
 ## Nossos integrantes
