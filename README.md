@@ -33,6 +33,8 @@ O objetivo principal do aplicativo é fornecer uma ferramenta móvel para admini
 
 * **Experiência do Utilizador:**
     * **Tema Dinâmico (Modo Claro/Escuro):** Suporte completo a temas, com um botão no cabeçalho para alternar entre o modo claro e escuro em toda a aplicação.
+    * **Internacionalização (i18n):** Suporte completo aos idiomas Português e Espanhol, com troca dinâmica disponível no menu.
+    * **Notificações Push (Locais):** Envio de notificação local ao registrar uma nova manutenção, confirmando a operação.
     * **Indicadores de Carregamento:** Todas as telas que consomem dados da API exibem um indicador de carregamento com duração mínima de 1.5 segundos para garantir uma transição suave.
     * **Feedback ao Utilizador:** Uso de alertas para fornecer feedback sobre o sucesso ou falha das operações (cadastro, erros de login, etc.).
 
@@ -46,6 +48,8 @@ O objetivo principal do aplicativo é fornecer uma ferramenta móvel para admini
 * **React Native Maps** para a funcionalidade de geolocalização.
 * **React Native Dropdown Picker** para campos de seleção.
 * **AsyncStorage** para persistência de dados locais (token de sessão, chassi, coordenadas, etc.).
+* **Expo Localization** e **i18n-js** para internacionalização.
+* **Expo Notifications** para o envio de notificações push locais.
 
 ## Estrutura de Pastas
 
@@ -71,8 +75,6 @@ A estrutura de pastas do projeto foi organizada de maneira clara para separar as
   - **`services/`**: Camada de serviços para comunicação com a API, incluindo arquivos como `api.ts` para lidar com as requisições.
   
   - **`...`**: Outros arquivos de configuração do projeto, como `package.json`, `tsconfig.json`, entre outros.
-
-
 
 ---
 
