@@ -1,0 +1,159 @@
+{
+  "alerts": {
+    "attention": "Atenção",
+    "error": "Erro",
+    "success": "Sucesso!",
+    "errorCadastro": "Erro no Cadastro",
+    "errorExcluir": "Erro ao Excluir",
+    "errorConexao": "Erro de Conexão"
+  },
+  "tabs": {
+    "motos": "Motos",
+    "manutencao": "Manutenção",
+    "patio": "Pátio",
+    "localizacao": "Localização",
+    "sobre": "Sobre"
+  },
+  "register": {
+    "title": "Criar Conta",
+    "name": "Nome Completo",
+    "email": "Email",
+    "password": "Digite sua senha",
+    "button": "Cadastrar",
+    "loginLink": "Já tem uma conta? Voltar para o Login",
+    "alert": {
+      "fillAll": "Por favor, preencha todos os campos.",
+      "success": "Conta criada. Você já pode fazer o login.",
+      "error": "Não foi possível criar a conta. Tente novamente."
+    }
+  },
+  "login": {
+    "title": "Log In",
+    "email": "Digite seu email",
+    "password": "Digite sua senha",
+    "button": "Entrar",
+    "register": "Não tem uma conta? Cadastre-se",
+    "footer": "© 2025 Mottu - Todos os direitos reservados",
+    "alert": {
+      "fillAll": "Por favor, preencha o email e a senha.",
+      "error": "Email ou senha inválidos.",
+      "welcome": "Seja bem-vindo, {nome}!"
+    }
+  },
+  "motos": {
+    "loading": "Carregando motos...",
+    "headerTitle": "Cadastre uma moto",
+    "searchPlaceholder": "Procurar por placa...",
+    "listTitle": "Motos cadastradas",
+    "listEmpty": "Nenhuma moto encontrada",
+    "card": {
+      "placa": "Placa",
+      "ano": "Ano",
+      "chassi": "Chassi (VIN)"
+    },
+    "deleteModal": "Tem certeza que deseja excluir?",
+    "addModal": {
+      "title": "Cadastre uma moto",
+      "button": "Cadastrar",
+      "placaPlaceholder": "ABC-1234",
+      "anoPlaceholder": "2020-2025",
+      "chassiPlaceholder": "0AA000AA00A000000"
+    },
+    "alert": {
+      "loadError": "Não foi possível carregar as motos.",
+      "fillAll": "Preencha todos os campos para cadastrar a moto.",
+      "invalidYear": "O ano deve ser um número válido.",
+      "addError": "Falha ao cadastrar a moto.",
+      "deleteError": "Falha ao excluir a moto."
+    }
+  },
+  "manutencao": {
+    "headerTitle": "Manutenção",
+    "loading": "Carregando manutenções...",
+    "form": {
+      "title": "Cadastrar Manutenção",
+      "dateLabel": "Data (Automática)",
+      "motoLabel": "Escolha uma moto",
+      "motoPlaceholder": "Selecione uma moto",
+      "motoEmpty": "Nenhuma moto cadastrada",
+      "tipoLabel": "Tipo de Manutenção",
+      "tipoPlaceholder": "Selecione um tipo",
+      "descLabel": "Descrição (Opcional)",
+      "descPlaceholder": "Descreva o problema...",
+      "button": "Cadastrar"
+    },
+    "tipos": {
+      "oleo": "Troca de óleo",
+      "revisao": "Revisão geral",
+      "motor": "Reparo no motor",
+      "pneus": "Troca de pneus",
+      "freios": "Freios",
+      "eletrica": "Elétrica",
+      "outros": "Outros"
+    },
+    "history": {
+      "title": "Histórico",
+      "empty": "Nenhuma manutenção registrada"
+    },
+    "modal": {
+      "title": "Detalhes da Manutenção",
+      "date": "Data:",
+      "moto": "Moto (Placa):",
+      "problema": "Problemas:",
+      "buttonConcluir": "Concluir Manutenção",
+      "buttonExcluir": "Excluir Manutenção",
+      "statusConcluida": "Esta manutenção foi concluída!",
+      "statusExcluida": "Esta manutenção foi excluída!"
+    },
+    "alert": {
+      "loadError": "Não foi possível buscar os dados da API.",
+      "fillAll": "Selecione a moto e o tipo de manutenção.",
+      "addError": "Erro ao salvar manutenção.",
+      "updateError": "Erro ao concluir manutenção.",
+      "deleteError": "Erro ao excluir manutenção."
+    },
+    "notification": {
+      "title": "Manutenção Agendada! 🏍️",
+      "body": "A manutenção para a moto {placa} foi registrada com sucesso."
+    }
+  },
+  "patio": {
+    "headerTitle": "Pátio Digital",
+    "loading": "Carregando dados do pátio...",
+    "dropdownPlaceholder": "Pesquise por placa",
+    "dropdownEmpty": "Nenhuma moto encontrada",
+    "modal": {
+      "placaModelo": "Placa e modelo:",
+      "ano": "Ano:",
+      "chassi": "Chassi (VIN):",
+      "manutencaoAberta": "Manutenção em Aberto:"
+    },
+    "alert": {
+      "loadError": "Não foi possível carregar os dados do pátio."
+    }
+  },
+  "localizacao": {
+    "headerTitle": "Localização",
+    "loading": "Carregando mapa...",
+    "dropdownPlaceholder": "Lista das motos ativas",
+    "dropdownEmpty": "Nenhuma moto disponível",
+    "modal": {
+      "placaModelo": "Placa e modelo:",
+      "ano": "Ano:",
+      "chassi": "Chassi (VIN):"
+    },
+    "alert": {
+      "loadError": "Não foi possível carregar as motos disponíveis."
+    }
+  },
+  "sobre": {
+    "headerTitle": "Sobre",
+    "title": "Mottu App",
+    "subtitle": "Gerenciamento de Frotas e Manutenção",
+    "cardTitle": "Integrantes:",
+    "integrante1": "Gustavo Camargo (RM555562)",
+    "integrante2": "Rodrigo Mantovanello (RM555451)",
+    "integrante3": "Leonardo Nascimento (RM558373)",
+    "commit": "Versão do Commit: {hash}"
+  }
+}
