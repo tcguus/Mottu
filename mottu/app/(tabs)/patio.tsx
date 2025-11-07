@@ -16,7 +16,8 @@ import Header from "../../components/Header";
 import { useFocusEffect } from "@react-navigation/native";
 import api from "../../services/api";
 import { rawColors } from "../../constants/theme";
-import { useTheme } from "../../context/ThemeContext";
+import { useAppSettings } from "../../context/AppSettingsContext";
+import i18n from "@/services/i18n";
 
 type MotoApi = {
   placa: string;
@@ -39,7 +40,7 @@ type MotoCompleta = MotoApi & {
 const CHASSI_STORAGE_KEY = "@motos_chassi";
 
 export default function Patio() {
-  const { colors } = useTheme();
+  const { colors } = useAppSettings();
   const [motos, setMotos] = useState<MotoCompleta[]>([]);
   const [selectedMoto, setSelectedMoto] = useState<MotoCompleta | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -87,8 +88,8 @@ export default function Patio() {
         } catch (error) {
           console.error("Erro ao carregar dados do pátio:", error);
           Alert.alert(
-            "Erro de Conexão",
-            "Não foi possível carregar os dados do pátio."
+            i18n.t("alerts.errorConexao"),
+            i18n.t("patio.alert.loadError")
           );
         }
       };
@@ -96,6 +97,7 @@ export default function Patio() {
       carregarDados();
     }, [])
   );
+
   const abrirModal = (moto: MotoCompleta) => {
     setSelectedMoto(moto);
     setModalVisible(true);
@@ -109,11 +111,13 @@ export default function Patio() {
     setHighlightedMoto(val);
     setTimeout(() => setHighlightedMoto(null), 3000);
   };
+
   const disponiveis = motos.filter((m) => !m.emManutencao);
   const manutencao = motos.filter((m) => m.emManutencao);
   const vagasPorColuna = 10;
   const coluna1 = disponiveis.slice(0, vagasPorColuna);
   const coluna3 = disponiveis.slice(vagasPorColuna);
+
   const renderColuna = (lista: MotoCompleta[], cor: string) => {
     const blocos = Array.from(
       { length: vagasPorColuna },
@@ -161,7 +165,7 @@ export default function Patio() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="Pátio Digital" showBackButton={true} />
+      <Header title={i18n.t("patio.headerTitle")} showBackButton={true} />
 
       <DropDownPicker
         open={dropdownOpen}
@@ -171,7 +175,7 @@ export default function Patio() {
             ? dropdownItems
             : [
                 {
-                  label: "Nenhuma moto encontrada",
+                  label: i18n.t("patio.dropdownEmpty"),
                   value: null,
                   disabled: true,
                 },
@@ -187,7 +191,7 @@ export default function Patio() {
           }
         }}
         setItems={setDropdownItems}
-        placeholder="Pesquise por placa"
+        placeholder={i18n.t("patio.dropdownPlaceholder")}
         dropDownDirection="BOTTOM"
         style={[styles.dropdown, { backgroundColor: colors.background }]}
         dropDownContainerStyle={[
@@ -255,7 +259,7 @@ export default function Patio() {
             <View style={[styles.info, { backgroundColor: colors.background }]}>
               <View style={styles.desc}>
                 <Text style={[styles.labelInfo, { color: colors.text }]}>
-                  Placa e modelo:
+                  {i18n.t("patio.modal.placaModelo")}
                 </Text>
                 <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                   {selectedMoto?.placa} | {selectedMoto?.modelo}
@@ -263,7 +267,7 @@ export default function Patio() {
               </View>
               <View style={styles.desc}>
                 <Text style={[styles.labelInfo, { color: colors.text }]}>
-                  Ano:
+                  {i18n.t("patio.modal.ano")}
                 </Text>
                 <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                   {selectedMoto?.ano}
@@ -271,7 +275,7 @@ export default function Patio() {
               </View>
               <View style={styles.desc}>
                 <Text style={[styles.labelInfo, { color: colors.text }]}>
-                  Chassi (VIN):
+                  {i18n.t("patio.modal.chassi")}
                 </Text>
                 <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                   {selectedMoto?.chassi}
@@ -290,7 +294,7 @@ export default function Patio() {
                   style={[styles.desc, { backgroundColor: colors.background }]}
                 >
                   <Text style={[styles.labelInfo, { color: colors.text }]}>
-                    Manutenção em Aberto:
+                    {i18n.t("patio.modal.manutencaoAberta")}
                   </Text>
                   <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                     {selectedMoto.tipoManutencao}

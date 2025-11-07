@@ -16,10 +16,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useUser } from "../context/UserContext";
 import { rawColors } from "@/constants/theme";
-import { useTheme } from "@/context/ThemeContext";
+import { useAppSettings } from "../context/AppSettingsContext";
+import i18n from "@/services/i18n";
 
 export default function LoginScreen() {
-  const { colors } = useTheme();
+  const { colors } = useAppSettings();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +30,7 @@ export default function LoginScreen() {
   const { signIn } = useUser();
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Atenção", "Por favor, preencha o email e a senha.");
+      Alert.alert(i18n.t("alerts.attention"), i18n.t("login.alert.fillAll"));
       return;
     }
     setIsLoading(true);
@@ -37,8 +38,8 @@ export default function LoginScreen() {
       await signIn(email, password);
     } catch (error: any) {
       const errorMessage =
-        error.response?.data?.message || "Email ou senha inválidos.";
-      Alert.alert("Erro de Login", errorMessage);
+        error.response?.data?.message || i18n.t("login.alert.error");
+      Alert.alert(i18n.t("alerts.error"), errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -70,9 +71,9 @@ export default function LoginScreen() {
             { backgroundColor: colors.background },
           ]}
         >
-          <Text style={styles.title}>Log In</Text>
+          <Text style={styles.title}>{i18n.t("login.title")}</Text>
           <TextInput
-            placeholder="Digite seu email"
+            placeholder={i18n.t("login.email")}
             placeholderTextColor={rawColors.verde}
             style={styles.input}
             value={email}
@@ -82,7 +83,7 @@ export default function LoginScreen() {
           />
           <View style={styles.passwordContainer}>
             <TextInput
-              placeholder="Digite sua senha"
+              placeholder={i18n.t("login.password")}
               placeholderTextColor={rawColors.verde}
               style={styles.inputSenha}
               secureTextEntry={!showPassword}
@@ -109,7 +110,7 @@ export default function LoginScreen() {
               <ActivityIndicator color={rawColors.branco} />
             ) : (
               <Text style={[styles.buttonText, { color: colors.background }]}>
-                Entrar
+                {i18n.t("login.button")}
               </Text>
             )}
           </TouchableOpacity>
@@ -119,13 +120,11 @@ export default function LoginScreen() {
               style={{ marginBottom: 40, alignItems: "center" }}
             >
               <Text style={{ color: "#007AFF", fontSize: 16 }}>
-                Não tem uma conta? Cadastre-se
+                {i18n.t("login.register")}
               </Text>
             </TouchableOpacity>
           </Link>
-          <Text style={styles.rodape}>
-            © 2025 Mottu - Todos os direitos reservados
-          </Text>
+          <Text style={styles.rodape}>{i18n.t("login.footer")}</Text>
         </View>
       </View>
       <Modal
@@ -137,7 +136,9 @@ export default function LoginScreen() {
         {user && (
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.bemVindo}>Seja bem-vindo, {user.nome}!</Text>
+              <Text style={styles.bemVindo}>
+                {i18n.t("login.alert.welcome", { nome: user.nome })}
+              </Text>
             </View>
           </View>
         )}

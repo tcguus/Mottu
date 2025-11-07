@@ -12,10 +12,11 @@ import { Link, useRouter } from "expo-router";
 import api from "../services/api";
 import { Ionicons } from "@expo/vector-icons";
 import { rawColors } from "@/constants/theme";
-import { useTheme } from "../context/ThemeContext";
+import { useAppSettings } from "../context/AppSettingsContext";
+import i18n from "@/services/i18n";
 
 export default function RegisterScreen() {
-  const { colors } = useTheme();
+  const { colors } = useAppSettings();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,21 +25,38 @@ export default function RegisterScreen() {
   const router = useRouter();
   const handleRegister = async () => {
     if (!nome || !email || !password) {
-      Alert.alert("Atenção", "Por favor, preencha todos os campos.");
+      Alert.alert(i18n.t("alerts.attention"), i18n.t("register.alert.fillAll"));
       return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert(
+        i18n.t("alerts.attention"),
+        i18n.t("register.alert.invalidEmail")
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert(
+        i18n.t("alerts.attention"),
+        i18n.t("register.alert.passwordLength")
+      );
+      return;
+    }
+
     setIsLoading(true);
     try {
       await api.post("/Auth/register", { nome, email, senha: password });
 
-      Alert.alert("Sucesso!", "Conta criada. Você já pode fazer o login.");
+      Alert.alert(i18n.t("alerts.success"), i18n.t("register.alert.success"));
       router.replace("/");
     } catch (error: any) {
       console.error("Erro no cadastro:", error.response?.data);
       const errorMessage =
-        error.response?.data?.message ||
-        "Não foi possível criar a conta. Tente novamente.";
-      Alert.alert("Erro", errorMessage);
+        error.response?.data?.message || i18n.t("register.alert.error");
+      Alert.alert(i18n.t("alerts.error"), errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -46,18 +64,18 @@ export default function RegisterScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={styles.title}>Criar Conta</Text>
+      <Text style={styles.title}>{i18n.t("register.title")}</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Nome Completo"
+        placeholder={i18n.t("register.name")}
         value={nome}
         onChangeText={setNome}
         placeholderTextColor={rawColors.verde}
       />
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder={i18n.t("register.email")}
         keyboardType="email-address"
         autoCapitalize="none"
         value={email}
@@ -66,7 +84,7 @@ export default function RegisterScreen() {
       />
       <View style={styles.passwordContainer}>
         <TextInput
-          placeholder="Digite sua senha"
+          placeholder={i18n.t("register.password")}
           placeholderTextColor={rawColors.verde}
           style={styles.inputSenha}
           secureTextEntry={!showPassword}
@@ -94,7 +112,7 @@ export default function RegisterScreen() {
           <ActivityIndicator color="#FFF" />
         ) : (
           <Text style={[styles.buttonText, { color: colors.background }]}>
-            Cadastrar
+            {i18n.t("register.button")}
           </Text>
         )}
       </TouchableOpacity>
@@ -102,7 +120,7 @@ export default function RegisterScreen() {
       <Link href="/" asChild>
         <TouchableOpacity style={{ marginTop: 20 }}>
           <Text style={{ color: "#007AFF", fontSize: 16 }}>
-            Já tem uma conta? Voltar para o Login
+            {i18n.t("register.loginLink")}
           </Text>
         </TouchableOpacity>
       </Link>

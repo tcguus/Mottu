@@ -1,11 +1,11 @@
 import { Stack } from "expo-router";
 import { UserProvider } from "../context/UserContext";
-import { ThemeProvider } from "../context/ThemeContext";
+import { AppSettingsProvider } from "../context/AppSettingsContext";
 import React from "react";
 
 export default function RootLayout() {
   return (
-    <ThemeProvider>
+    <AppSettingsProvider>
       <UserProvider>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
@@ -13,6 +13,6 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
         </Stack>
       </UserProvider>
-    </ThemeProvider>
+    </AppSettingsProvider>
   );
 }

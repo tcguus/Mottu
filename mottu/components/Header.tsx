@@ -12,8 +12,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useUser } from "../context/UserContext";
-import { useTheme } from "../context/ThemeContext";
+import { useAppSettings } from "../context/AppSettingsContext";
 import { rawColors } from "@/constants/theme";
+import i18n from "@/services/i18n";
 
 type HeaderProps = {
   title?: string;
@@ -23,7 +24,7 @@ type HeaderProps = {
 export default function Header({ title, showBackButton = false }: HeaderProps) {
   const router = useRouter();
   const { user, signOut } = useUser();
-  const { theme, toggleTheme, colors } = useTheme();
+  const { theme, toggleTheme, colors, locale, setLocale } = useAppSettings();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
 
@@ -101,6 +102,11 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
     }, 2000);
   };
 
+  const handleToggleLanguage = () => {
+    const newLocale = locale === "pt" ? "es" : "pt";
+    setLocale(newLocale);
+  };
+
   return (
     <>
       {showLoading && (
@@ -109,7 +115,7 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
             <Animated.View
               style={[styles.spinner, { transform: [{ rotate: spin }] }]}
             />
-            <Text style={styles.loadingText}>Desconectando...</Text>
+            <Text style={styles.loadingText}>{i18n.t("header.loading")}</Text>
           </View>
         </Modal>
       )}
@@ -134,11 +140,12 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
         {user && (
           <View style={styles.drawerContent}>
             <Text style={[styles.drawerText, { color: colors.background }]}>
-              Logado como:
+              {i18n.t("header.loggedInAs")}
             </Text>
             <Text style={[styles.drawerSubText, { color: colors.background }]}>
               {user.nome}
             </Text>
+            ={" "}
             <View style={styles.teste}>
               <TouchableOpacity
                 onPress={handleLogout}
@@ -150,20 +157,33 @@ export default function Header({ title, showBackButton = false }: HeaderProps) {
                   color={colors.background}
                 />
                 <Text style={[styles.logoutText, { color: colors.background }]}>
-                  Log Out
+                  {i18n.t("header.logout")}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={toggleTheme}
-                style={styles.actionButton}
-              >
-                <Ionicons
-                  name={theme === "light" ? "moon-outline" : "sunny-outline"}
-                  size={26}
-                  color={colors.background}
-                />
-              </TouchableOpacity>
+
+              <View style={styles.actionButtonsContainer}>
+                <TouchableOpacity
+                  onPress={handleToggleLanguage}
+                  style={styles.actionButton}
+                >
+                  <Text style={styles.languageText}>
+                    {locale.toUpperCase()}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={toggleTheme}
+                  style={styles.actionButton}
+                >
+                  <Ionicons
+                    name={theme === "light" ? "moon-outline" : "sunny-outline"}
+                    size={26}
+                    color={colors.background}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
+            ={" "}
           </View>
         )}
       </Animated.View>
@@ -219,6 +239,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#5",
     zIndex: 20,
     paddingLeft: 16,
+    paddingRight: 10,
     paddingTop: 0,
     borderBottomRightRadius: 30,
     borderTopRightRadius: 30,
@@ -226,12 +247,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 52,
+    overflow: "hidden",
   },
   drawerContent: {
     flexDirection: "column",
     marginLeft: 12,
     marginTop: 13,
-    gap: "4",
+    flex: 1,
   },
   drawerText: {
     fontSize: 18,
@@ -258,11 +280,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 4,
     marginBottom: 9,
+    flexShrink: 1,
   },
   logoutText: {
     color: rawColors.branco,
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 14,
     marginLeft: 8,
   },
   loadingOverlay: {
@@ -287,12 +310,27 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     marginBottom: 4,
+    marginLeft: 10,
+  },
+  languageText: {
+    color: rawColors.branco,
+    fontWeight: "bold",
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: rawColors.branco,
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
   },
   teste: {
     marginTop: -15,
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: "70",
+    justifyContent: "space-between",
+  },
+  actionButtonsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });

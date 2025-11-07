@@ -155,5 +155,10 @@
     "integrante2": "Rodrigo Mantovanello (RM555451)",
     "integrante3": "Leonardo Nascimento (RM558373)",
     "commit": "Versión del Commit: {hash}"
+  },
+  "header": {
+    "loading": "Desconectando...",
+    "loggedInAs": "Sesión iniciada como:",
+    "logout": "Cerrar Sesión"
   }
 }

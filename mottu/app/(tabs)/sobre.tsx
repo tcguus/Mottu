@@ -7,15 +7,14 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Header from "../../components/Header";
-import { useTheme } from "../../context/ThemeContext";
+import { useAppSettings } from "../../context/AppSettingsContext";
 import { Ionicons } from "@expo/vector-icons";
-import { rawColors } from "@/constants/theme";
+import i18n from "@/services/i18n";
 
 const COMMIT_HASH = "5c2b781d";
 
 export default function SobreScreen() {
-  const { colors } = useTheme();
-
+  const { colors } = useAppSettings();
   const openGitHub = (url: string) => {
     Linking.openURL(url).catch((err) =>
       console.error("Não foi possível abrir o link", err)
@@ -24,17 +23,19 @@ export default function SobreScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="Sobre" showBackButton={true} />
+      <Header title={i18n.t("sobre.headerTitle")} showBackButton={true} />
 
       <View style={styles.content}>
-        <Text style={[styles.title, { color: colors.text }]}>Mottu App</Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {i18n.t("sobre.title")}
+        </Text>
         <Text style={[styles.subtitle, { color: colors.subtext }]}>
-          Gerenciamento de Frotas e Manutenção
+          {i18n.t("sobre.subtitle")}
         </Text>
 
         <View style={[styles.card, { backgroundColor: colors.card }]}>
           <Text style={[styles.cardTitle, { color: colors.background }]}>
-            Integrantes:
+            {i18n.t("sobre.cardTitle")}
           </Text>
 
           <TouchableOpacity
@@ -49,7 +50,7 @@ export default function SobreScreen() {
               <Text
                 style={[styles.integranteText, { color: colors.background }]}
               >
-                Gustavo Camargo (RM555562)
+                {i18n.t("sobre.integrante1")}
               </Text>
             </View>
           </TouchableOpacity>
@@ -68,7 +69,7 @@ export default function SobreScreen() {
               <Text
                 style={[styles.integranteText, { color: colors.background }]}
               >
-                Rodrigo Mantovanello (RM555451)
+                {i18n.t("sobre.integrante2")}
               </Text>
             </View>
           </TouchableOpacity>
@@ -85,14 +86,14 @@ export default function SobreScreen() {
               <Text
                 style={[styles.integranteText, { color: colors.background }]}
               >
-                Leonardo Nascimento (RM558373)
+                {i18n.t("sobre.integrante3")}
               </Text>
             </View>
           </TouchableOpacity>
         </View>
 
         <Text style={[styles.commit, { color: colors.subtext }]}>
-          Versão do Commit: {COMMIT_HASH}
+          {i18n.t("sobre.commit", { hash: COMMIT_HASH })}
         </Text>
       </View>
     </View>

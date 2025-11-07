@@ -5,6 +5,30 @@ import api from "../services/api";
 import { jwtDecode } from "jwt-decode";
 import * as Notifications from "expo-notifications";
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
+
+async function requestNotificationPermissionsAsync() {
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus;
+  if (existingStatus !== "granted") {
+    const { status } = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
+  if (finalStatus !== "granted") {
+    console.log("Permissão de notificação não concedida!");
+    return;
+  }
+  console.log("Permissão de notificação concedida.");
+}
+
 interface User {
   id: string;
   nome: string;
@@ -43,34 +67,6 @@ const getUserFromToken = (token: string): User | null => {
   }
 };
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
-
-async function registerForPushNotificationsAsync() {
-  let token;
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
-  if (existingStatus !== "granted") {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-  if (finalStatus !== "granted") {
-    alert("Falha ao obter token para notificação push!");
-    return;
-  }
-  token = (await Notifications.getExpoPushTokenAsync()).data;
-  console.log(token);
-
-  return token;
-}
-
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -99,7 +95,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       }
     }
     loadUserFromStorage();
-    registerForPushNotificationsAsync();
+    requestNotificationPermissionsAsync();
   }, []);
 
   useEffect(() => {

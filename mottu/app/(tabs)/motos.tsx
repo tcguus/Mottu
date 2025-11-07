@@ -16,7 +16,8 @@ import Header from "../../components/Header";
 import { Ionicons } from "@expo/vector-icons";
 import api from "../../services/api";
 import { rawColors } from "@/constants/theme";
-import { useTheme } from "../../context/ThemeContext";
+import { useAppSettings } from "../../context/AppSettingsContext";
+import i18n from "@/services/i18n"; 
 
 type ModeloType = "Pop" | "Sport" | "-E";
 type MotoType = {
@@ -34,7 +35,7 @@ const imagens: Record<ModeloType, any> = {
 };
 
 export default function CadastroMoto() {
-  const { colors } = useTheme();
+  const { colors } = useAppSettings();
   const [isLoading, setIsLoading] = useState(true);
   const [motos, setMotos] = useState<MotoType[]>([]);
   const [placa, setPlaca] = useState("");
@@ -45,6 +46,7 @@ export default function CadastroMoto() {
   const [modalVisible, setModalVisible] = useState(false);
   const [motoParaExcluir, setMotoParaExcluir] = useState<string | null>(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
+
   const loadMotos = async () => {
     if (!isLoading) setIsLoading(true);
 
@@ -71,7 +73,7 @@ export default function CadastroMoto() {
       await Promise.all([fetchDataPromise(), minimumTimePromise]);
     } catch (error) {
       console.error(error);
-      Alert.alert("Erro", "Não foi possível carregar as motos.");
+      Alert.alert(i18n.t("alerts.error"), i18n.t("motos.alert.loadError"));
     } finally {
       setIsLoading(false);
     }
@@ -83,14 +85,14 @@ export default function CadastroMoto() {
 
   const adicionarMoto = async () => {
     if (!placa || !ano || !modelo || !chassi) {
-      Alert.alert("Atenção", "Preencha todos os campos para cadastrar a moto.");
+      Alert.alert(i18n.t("alerts.attention"), i18n.t("motos.alert.fillAll"));
       return;
     }
 
     try {
       const anoNumber = parseInt(ano, 10);
       if (isNaN(anoNumber)) {
-        Alert.alert("Erro", "O ano deve ser um número válido.");
+        Alert.alert(i18n.t("alerts.error"), i18n.t("motos.alert.invalidYear"));
         return;
       }
 
@@ -117,8 +119,8 @@ export default function CadastroMoto() {
     } catch (error: any) {
       console.error("Erro no cadastro:", error.response?.data);
       const errorMessage =
-        error.response?.data?.message || "Falha ao cadastrar a moto.";
-      Alert.alert("Erro no Cadastro", errorMessage);
+        error.response?.data?.message || i18n.t("motos.alert.addError");
+      Alert.alert(i18n.t("alerts.errorCadastro"), errorMessage);
     }
   };
 
@@ -139,8 +141,8 @@ export default function CadastroMoto() {
     } catch (error: any) {
       console.error("Erro ao excluir:", error.response?.data);
       const errorMessage =
-        error.response?.data?.message || "Falha ao excluir a moto.";
-      Alert.alert("Erro ao Excluir", errorMessage);
+        error.response?.data?.message || i18n.t("motos.alert.deleteError");
+      Alert.alert(i18n.t("alerts.errorExcluir"), errorMessage);
     }
   };
 
@@ -156,13 +158,13 @@ export default function CadastroMoto() {
           { backgroundColor: colors.background },
         ]}
       >
-        <Header title="Cadastre uma moto" showBackButton={true} />
+        <Header title={i18n.t("motos.headerTitle")} showBackButton={true} />
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
           <ActivityIndicator size="large" color={rawColors.verde} />
           <Text style={{ marginTop: 10, color: rawColors.verde }}>
-            Carregando motos...
+            {i18n.t("motos.loading")}
           </Text>
         </View>
       </View>
@@ -176,7 +178,7 @@ export default function CadastroMoto() {
   if (motos.length > 0) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Header title="Cadastre uma moto" showBackButton={true} />
+        <Header title={i18n.t("motos.headerTitle")} showBackButton={true} />
         <View
           style={[
             styles.searchContainer,
@@ -185,7 +187,7 @@ export default function CadastroMoto() {
         >
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Procurar por placa..."
+            placeholder={i18n.t("motos.searchPlaceholder")}
             placeholderTextColor={colors.text}
             value={search}
             onChangeText={setSearch}
@@ -199,7 +201,7 @@ export default function CadastroMoto() {
         </View>
 
         <Text style={[styles.title, { color: colors.text }]}>
-          Motos cadastradas
+          {i18n.t("motos.listTitle")}
         </Text>
         <FlatList
           data={motosFiltradas}
@@ -218,7 +220,7 @@ export default function CadastroMoto() {
                 { color: colors.text },
               ]}
             >
-              Nenhuma moto encontrada
+              {i18n.t("motos.listEmpty")}
             </Text>
           )}
           renderItem={({ item }) => (
@@ -240,7 +242,7 @@ export default function CadastroMoto() {
                 >
                   <View style={styles.desc}>
                     <Text style={[styles.labelInfo, { color: colors.text }]}>
-                      Placa
+                      {i18n.t("motos.card.placa")}
                     </Text>
                     <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                       {item.placa}
@@ -248,7 +250,7 @@ export default function CadastroMoto() {
                   </View>
                   <View style={styles.desc}>
                     <Text style={[styles.labelInfo, { color: colors.text }]}>
-                      Ano
+                      {i18n.t("motos.card.ano")}
                     </Text>
                     <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                       {item.ano}
@@ -256,7 +258,7 @@ export default function CadastroMoto() {
                   </View>
                   <View style={styles.desc}>
                     <Text style={[styles.labelInfo, { color: colors.text }]}>
-                      Chassi (VIN)
+                      {i18n.t("motos.card.chassi")}
                     </Text>
                     <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                       {item.chassi}
@@ -285,9 +287,7 @@ export default function CadastroMoto() {
                 { backgroundColor: colors.background },
               ]}
             >
-              <Text style={styles.bemVindo}>
-                Tem certeza que deseja excluir?
-              </Text>
+              <Text style={styles.bemVindo}>{i18n.t("motos.deleteModal")}</Text>
               <View style={{ flexDirection: "row", gap: 24 }}>
                 <TouchableOpacity
                   onPress={() => {
@@ -336,7 +336,7 @@ export default function CadastroMoto() {
                 <Ionicons name="close" size={28} color="#999" />
               </TouchableOpacity>
               <Text style={[styles.title, { color: colors.text }]}>
-                Cadastre uma moto
+                {i18n.t("motos.addModal.title")}
               </Text>
               <View
                 style={[
@@ -378,11 +378,11 @@ export default function CadastroMoto() {
               />
               <View style={styles.inputt}>
                 <Text style={[styles.labelInfo, { color: colors.text }]}>
-                  Placa
+                  {i18n.t("motos.card.placa")}
                 </Text>
                 <TextInput
                   style={[styles.input, { color: colors.subtext }]}
-                  placeholder="ABC-1234"
+                  placeholder={i18n.t("motos.addModal.placaPlaceholder")}
                   placeholderTextColor={"#888"}
                   value={placa}
                   maxLength={8}
@@ -400,12 +400,12 @@ export default function CadastroMoto() {
               </View>
               <View style={styles.inputt}>
                 <Text style={[styles.labelInfo, { color: colors.text }]}>
-                  Ano
+                  {i18n.t("motos.card.ano")}
                 </Text>
                 <TextInput
                   style={[styles.input, { color: colors.subtext }]}
                   maxLength={4}
-                  placeholder="2020-2025"
+                  placeholder={i18n.t("motos.addModal.anoPlaceholder")}
                   placeholderTextColor={"#888"}
                   keyboardType="numeric"
                   value={ano}
@@ -414,12 +414,12 @@ export default function CadastroMoto() {
               </View>
               <View style={styles.inputt}>
                 <Text style={[styles.labelInfo, { color: colors.text }]}>
-                  Chassi (VIN)
+                  {i18n.t("motos.card.chassi")}
                 </Text>
                 <TextInput
                   style={[styles.input, { color: colors.subtext }]}
                   maxLength={17}
-                  placeholder="0AA000AA00A000000"
+                  placeholder={i18n.t("motos.addModal.chassiPlaceholder")}
                   placeholderTextColor={"#888"}
                   value={chassi}
                   onChangeText={setChassi}
@@ -430,7 +430,7 @@ export default function CadastroMoto() {
                 style={styles.botaoCadastrar}
               >
                 <Text style={[styles.botaoTexto, { color: colors.background }]}>
-                  Cadastrar
+                  {i18n.t("motos.addModal.button")}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -442,9 +442,9 @@ export default function CadastroMoto() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="Cadastre uma moto" showBackButton={true} />
+      <Header title={i18n.t("motos.headerTitle")} showBackButton={true} />
       <Text style={[styles.title, { color: colors.text }]}>
-        Cadastre uma moto
+        {i18n.t("motos.addModal.title")}
       </Text>
       <View style={styles.modeloContainer}>
         {["Pop", "Sport", "-E"].map((item) => (
@@ -479,10 +479,12 @@ export default function CadastroMoto() {
       />
       <View style={styles.inputGroup}>
         <View style={styles.inputt}>
-          <Text style={[styles.labelInfo, { color: colors.text }]}>Placa</Text>
+          <Text style={[styles.labelInfo, { color: colors.text }]}>
+            {i18n.t("motos.card.placa")}
+          </Text>
           <TextInput
             style={[styles.input, { color: colors.subtext }]}
-            placeholder="ABC-1234"
+            placeholder={i18n.t("motos.addModal.placaPlaceholder")}
             placeholderTextColor={"#888"}
             value={placa}
             maxLength={8}
@@ -496,11 +498,13 @@ export default function CadastroMoto() {
           />
         </View>
         <View style={styles.inputt}>
-          <Text style={[styles.labelInfo, { color: colors.text }]}>Ano</Text>
+          <Text style={[styles.labelInfo, { color: colors.text }]}>
+            {i18n.t("motos.card.ano")}
+          </Text>
           <TextInput
             style={[styles.input, { color: colors.subtext }]}
             maxLength={4}
-            placeholder="2020-2025"
+            placeholder={i18n.t("motos.addModal.anoPlaceholder")}
             placeholderTextColor={"#888"}
             keyboardType="numeric"
             value={ano}
@@ -509,12 +513,12 @@ export default function CadastroMoto() {
         </View>
         <View style={styles.inputt}>
           <Text style={[styles.labelInfo, { color: colors.text }]}>
-            Chassi (VIN)
+            {i18n.t("motos.card.chassi")}
           </Text>
           <TextInput
             style={[styles.input, { color: colors.subtext }]}
             maxLength={17}
-            placeholder="0AA000AA00A000000"
+            placeholder={i18n.t("motos.addModal.chassiPlaceholder")}
             placeholderTextColor={"#888"}
             value={chassi}
             onChangeText={setChassi}
@@ -523,7 +527,7 @@ export default function CadastroMoto() {
       </View>
       <TouchableOpacity onPress={adicionarMoto} style={styles.botaoCadastrar}>
         <Text style={[styles.botaoTexto, { color: colors.background }]}>
-          Cadastrar
+          {i18n.t("motos.addModal.button")}
         </Text>
       </TouchableOpacity>
     </View>

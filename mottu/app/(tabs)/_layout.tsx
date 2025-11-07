@@ -3,14 +3,14 @@ import MotoIcon from "../../components/icons/MotoIcon";
 import PatioIcon from "../../components/icons/PatioIcon";
 import ManutencaoIcon from "../../components/icons/ManutencaoIcon";
 import LocalizacaoIcon from "../../components/icons/LocalizacaoIcon";
-import SobreIcon from "../../components/icons/SobreIcon"; // 1. IMPORTE O NOVO ÍCONE
+import SobreIcon from "../../components/icons/SobreIcon";
 import React from "react";
 import { View } from "react-native";
 import { rawColors } from "@/constants/theme";
-import { useTheme } from "@/context/ThemeContext";
+import { useAppSettings } from "../../context/AppSettingsContext";
 
 export default function TabLayout() {
-  const { colors } = useTheme();
+  const { colors } = useAppSettings();
 
   return (
     <Tabs
@@ -73,13 +73,11 @@ export default function TabLayout() {
         }}
       />
 
-      {/* 2. ATUALIZE ESTA TELA */}
       <Tabs.Screen
         name="sobre"
         options={{
           tabBarIcon: ({ focused }: { focused: boolean }) => (
             <IconWrapper focused={focused}>
-              {/* Use o SobreIcon ao invés de Ionicons */}
               <SobreIcon color={colors.background} size={24} />
             </IconWrapper>
           ),

@@ -16,9 +16,10 @@ import { Ionicons } from "@expo/vector-icons";
 import Header from "../../components/Header";
 import { useFocusEffect } from "@react-navigation/native";
 import api from "../../services/api";
-import { useTheme } from "../../context/ThemeContext";
+import { useAppSettings } from "../../context/AppSettingsContext";
 import { darkMapStyle } from "../../constants/mapStyles";
 import { rawColors } from "../../constants/theme";
+import i18n from "@/services/i18n";
 
 type MotoApi = {
   placa: string;
@@ -41,7 +42,7 @@ const SAO_PAULO_COORDS = { latitude: -23.567776, longitude: -46.709247 };
 const RAIO_METROS = 10000;
 
 export default function Localizacao() {
-  const { theme, colors } = useTheme();
+  const { colors, theme } = useAppSettings();
   const [isLoading, setIsLoading] = useState(true);
   const [motos, setMotos] = useState<MotoCompleta[]>([]);
   const [selectedMoto, setSelectedMoto] = useState<MotoCompleta | null>(null);
@@ -137,10 +138,7 @@ export default function Localizacao() {
           await Promise.all([fetchDataPromise(), minimumTimePromise]);
         } catch (error) {
           console.error("Erro ao carregar motos para o mapa:", error);
-          Alert.alert(
-            "Erro de Conexão",
-            "Não foi possível carregar as motos disponíveis."
-          );
+          Alert.alert("Erro de Conexão", i18n.t("localizacao.alert.loadError"));
         } finally {
           setIsLoading(false);
         }
@@ -181,13 +179,16 @@ export default function Localizacao() {
           backgroundColor: colors.background,
         }}
       >
-        <Header title="Localização" showBackButton={true} />
+        <Header
+          title={i18n.t("localizacao.headerTitle")}
+          showBackButton={true}
+        />
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
           <ActivityIndicator size="large" color={colors.tint} />
           <Text style={{ marginTop: 10, color: colors.tint }}>
-            Carregando mapa...
+            {i18n.t("localizacao.loading")}
           </Text>
         </View>
       </View>
@@ -196,7 +197,7 @@ export default function Localizacao() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <Header title="Localização" showBackButton={true} />
+      <Header title={i18n.t("localizacao.headerTitle")} showBackButton={true} />
 
       <View style={styles.dropdownContainer}>
         <DropDownPicker
@@ -207,7 +208,7 @@ export default function Localizacao() {
               ? dropdownItems
               : [
                   {
-                    label: "Nenhuma moto disponível",
+                    label: i18n.t("localizacao.headerTitle"),
                     value: null,
                     disabled: true,
                   },
@@ -231,7 +232,7 @@ export default function Localizacao() {
             }
           }}
           setItems={setDropdownItems}
-          placeholder="Lista das motos ativas"
+          placeholder={i18n.t("localizacao.dropdownPlaceholder")}
           dropDownDirection="BOTTOM"
           style={[
             styles.dropdown,
@@ -328,7 +329,7 @@ export default function Localizacao() {
             <View style={[styles.info, { backgroundColor: colors.background }]}>
               <View style={styles.desc}>
                 <Text style={[styles.labelInfo, { color: colors.text }]}>
-                  Placa e modelo:
+                  {i18n.t("localizacao.modal.placaModelo")}
                 </Text>
                 <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                   {selectedMoto?.placa} | {selectedMoto?.modelo}
@@ -336,7 +337,7 @@ export default function Localizacao() {
               </View>
               <View style={styles.desc}>
                 <Text style={[styles.labelInfo, { color: colors.text }]}>
-                  Ano:
+                  {i18n.t("localizacao.modal.ano")}
                 </Text>
                 <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                   {selectedMoto?.ano}
@@ -344,7 +345,7 @@ export default function Localizacao() {
               </View>
               <View style={styles.desc}>
                 <Text style={[styles.labelInfo, { color: colors.text }]}>
-                  Chassi (VIN):
+                  {i18n.t("localizacao.modal.chassi")}
                 </Text>
                 <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                   {selectedMoto?.chassi}

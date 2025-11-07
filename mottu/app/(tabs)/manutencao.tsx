@@ -17,11 +17,11 @@ import { useFocusEffect } from "@react-navigation/native";
 import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { rawColors } from "../../constants/theme";
-import { useTheme } from "../../context/ThemeContext";
+import { useAppSettings } from "../../context/AppSettingsContext";
 import * as Notifications from "expo-notifications";
+import i18n from "@/services/i18n";
 
 type ManutencaoStatus = "Aberta" | "Concluida" | "excluido";
-
 type Manutencao = {
   id: string;
   placa: string;
@@ -33,7 +33,7 @@ type Manutencao = {
 const EXCLUIDAS_STORAGE_KEY = "@manutencoes_excluidas";
 
 export default function ManutencaoScreen() {
-  const { colors } = useTheme();
+  const { colors } = useAppSettings();
   const [isLoading, setIsLoading] = useState(true);
   const [manutencoes, setManutencoes] = useState<Manutencao[]>([]);
   const [descricao, setDescricao] = useState("");
@@ -45,13 +45,34 @@ export default function ManutencaoScreen() {
   const [openTipo, setOpenTipo] = useState(false);
   const [tipo, setTipo] = useState<string | null>(null);
   const [tipos, setTipos] = useState([
-    { label: "Troca de óleo", value: "Troca de óleo" },
-    { label: "Revisão geral", value: "Revisão geral" },
-    { label: "Reparo no motor", value: "Reparo no motor" },
-    { label: "Troca de pneus", value: "Troca de pneus" },
-    { label: "Freios", value: "Freios" },
-    { label: "Elétrica", value: "Elétrica" },
-    { label: "Outros", value: "Outros" },
+    {
+      label: i18n.t("manutencao.tipos.oleo"),
+      value: i18n.t("manutencao.tipos.oleo"),
+    },
+    {
+      label: i18n.t("manutencao.tipos.revisao"),
+      value: i18n.t("manutencao.tipos.revisao"),
+    },
+    {
+      label: i18n.t("manutencao.tipos.motor"),
+      value: i18n.t("manutencao.tipos.motor"),
+    },
+    {
+      label: i18n.t("manutencao.tipos.pneus"),
+      value: i18n.t("manutencao.tipos.pneus"),
+    },
+    {
+      label: i18n.t("manutencao.tipos.freios"),
+      value: i18n.t("manutencao.tipos.freios"),
+    },
+    {
+      label: i18n.t("manutencao.tipos.eletrica"),
+      value: i18n.t("manutencao.tipos.eletrica"),
+    },
+    {
+      label: i18n.t("manutencao.tipos.outros"),
+      value: i18n.t("manutencao.tipos.outros"),
+    },
   ]);
   const [modalVisible, setModalVisible] = useState(false);
   const [manutencaoSelecionada, setManutencaoSelecionada] =
@@ -83,7 +104,11 @@ export default function ManutencaoScreen() {
           );
         } else {
           setListaMotos([
-            { label: "Nenhuma moto cadastrada", value: "none", disabled: true },
+            {
+              label: i18n.t("manutencao.form.motoEmpty"),
+              value: "none",
+              disabled: true,
+            },
           ]);
         }
 
@@ -103,7 +128,7 @@ export default function ManutencaoScreen() {
       await Promise.all([fetchDataPromise(), minimumTimePromise]);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
-      Alert.alert("Erro", "Não foi possível buscar os dados da API.");
+      Alert.alert(i18n.t("alerts.error"), i18n.t("manutencao.alert.loadError"));
     } finally {
       setIsLoading(false);
     }
@@ -112,12 +137,45 @@ export default function ManutencaoScreen() {
   useFocusEffect(
     useCallback(() => {
       carregarDados();
-    }, [])
+      setTipos([
+        {
+          label: i18n.t("manutencao.tipos.oleo"),
+          value: i18n.t("manutencao.tipos.oleo"),
+        },
+        {
+          label: i18n.t("manutencao.tipos.revisao"),
+          value: i18n.t("manutencao.tipos.revisao"),
+        },
+        {
+          label: i18n.t("manutencao.tipos.motor"),
+          value: i18n.t("manutencao.tipos.motor"),
+        },
+        {
+          label: i18n.t("manutencao.tipos.pneus"),
+          value: i18n.t("manutencao.tipos.pneus"),
+        },
+        {
+          label: i18n.t("manutencao.tipos.freios"),
+          value: i18n.t("manutencao.tipos.freios"),
+        },
+        {
+          label: i18n.t("manutencao.tipos.eletrica"),
+          value: i18n.t("manutencao.tipos.eletrica"),
+        },
+        {
+          label: i18n.t("manutencao.tipos.outros"),
+          value: i18n.t("manutencao.tipos.outros"),
+        },
+      ]);
+    }, [carregarDados])
   );
 
   const salvarManutencao = async () => {
     if (!motoSelecionada || !tipo) {
-      Alert.alert("Atenção", "Selecione a moto e o tipo de manutenção.");
+      Alert.alert(
+        i18n.t("alerts.attention"),
+        i18n.t("manutencao.alert.fillAll")
+      );
       return;
     }
     const novaManutencao = {
@@ -127,18 +185,19 @@ export default function ManutencaoScreen() {
     try {
       await api.post("/Manutencoes", novaManutencao);
 
-      
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "Manutenção Agendada! 🏍️",
-          body: `A manutenção para a moto ${motoSelecionada} foi registrada com sucesso.`,
+          title: i18n.t("manutencao.notification.title"),
+          body: i18n.t("manutencao.notification.body", {
+            placa: motoSelecionada,
+          }),
         },
         trigger: {
-          seconds: 2,
           type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-        }, 
+          seconds: 2,
+          repeats: false,
+        },
       });
-     
 
       setMotoSelecionada(null);
       setTipo(null);
@@ -146,8 +205,8 @@ export default function ManutencaoScreen() {
       await carregarDados();
     } catch (error: any) {
       const errorMessage =
-        error.response?.data?.message || "Erro ao salvar manutenção.";
-      Alert.alert("Erro", errorMessage);
+        error.response?.data?.message || i18n.t("manutencao.alert.addError");
+      Alert.alert(i18n.t("alerts.error"), errorMessage);
     }
   };
 
@@ -162,8 +221,8 @@ export default function ManutencaoScreen() {
       await carregarDados();
     } catch (error: any) {
       const errorMessage =
-        error.response?.data?.message || "Erro ao concluir manutenção.";
-      Alert.alert("Erro", errorMessage);
+        error.response?.data?.message || i18n.t("manutencao.alert.updateError");
+      Alert.alert(i18n.t("alerts.error"), errorMessage);
     }
   };
   const excluirManutencao = async () => {
@@ -189,8 +248,8 @@ export default function ManutencaoScreen() {
       await carregarDados();
     } catch (error: any) {
       const errorMessage =
-        error.response?.data?.message || "Erro ao excluir manutenção.";
-      Alert.alert("Erro", errorMessage);
+        error.response?.data?.message || i18n.t("manutencao.alert.deleteError");
+      Alert.alert(i18n.t("alerts.error"), errorMessage);
     }
   };
 
@@ -204,7 +263,10 @@ export default function ManutencaoScreen() {
           backgroundColor: colors.background,
         }}
       >
-        <Header title="Manutenção" showBackButton={true} />
+        <Header
+          title={i18n.t("manutencao.headerTitle")}
+          showBackButton={true}
+        />
         <View
           style={{
             flex: 1,
@@ -215,7 +277,7 @@ export default function ManutencaoScreen() {
         >
           <ActivityIndicator size="large" color={rawColors.verde} />
           <Text style={{ marginTop: 10, color: rawColors.verde }}>
-            Carregando manutenções...
+            {i18n.t("manutencao.loading")}
           </Text>
         </View>
       </View>
@@ -224,7 +286,7 @@ export default function ManutencaoScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Header title="Manutenção" showBackButton={true} />
+      <Header title={i18n.t("manutencao.headerTitle")} showBackButton={true} />
 
       <FlatList
         style={{ width: "100%", maxHeight: "90%" }}
@@ -237,10 +299,10 @@ export default function ManutencaoScreen() {
             }}
           >
             <Text style={[styles.title, { color: colors.text }]}>
-              Cadastrar Manutenção
+              {i18n.t("manutencao.form.title")}
             </Text>
             <Text style={[styles.label, { color: colors.text }]}>
-              Data (Automática)
+              {i18n.t("manutencao.form.dateLabel")}
             </Text>
             <View style={styles.inputBox}>
               <Text style={{ color: colors.subtext }}>
@@ -249,7 +311,7 @@ export default function ManutencaoScreen() {
             </View>
 
             <Text style={[styles.label, { color: colors.text }]}>
-              Escolha uma moto
+              {i18n.t("manutencao.form.motoLabel")}
             </Text>
             <DropDownPicker
               open={openMoto}
@@ -258,7 +320,7 @@ export default function ManutencaoScreen() {
               setOpen={setOpenMoto}
               setValue={setMotoSelecionada}
               setItems={setListaMotos}
-              placeholder="Selecione uma moto"
+              placeholder={i18n.t("manutencao.form.motoPlaceholder")}
               style={[styles.dropDown, { backgroundColor: colors.background }]}
               dropDownContainerStyle={[
                 styles.dropDownContainer,
@@ -298,7 +360,7 @@ export default function ManutencaoScreen() {
               )}
             />
             <Text style={[styles.label, { color: colors.text }]}>
-              Tipo de Manutenção
+              {i18n.t("manutencao.form.tipoLabel")}
             </Text>
             <DropDownPicker
               open={openTipo}
@@ -307,7 +369,7 @@ export default function ManutencaoScreen() {
               setOpen={setOpenTipo}
               setValue={setTipo}
               setItems={setTipos}
-              placeholder="Selecione um tipo"
+              placeholder={i18n.t("manutencao.form.tipoPlaceholder")}
               style={[styles.dropDown, { backgroundColor: colors.background }]}
               dropDownContainerStyle={[
                 styles.dropDownContainer,
@@ -347,29 +409,29 @@ export default function ManutencaoScreen() {
               )}
             />
             <Text style={[styles.label, { color: colors.text }]}>
-              Descrição (Opcional)
+              {i18n.t("manutencao.form.descLabel")}
             </Text>
             <TextInput
               multiline
               numberOfLines={4}
               value={descricao}
               onChangeText={setDescricao}
-              placeholder="Descreva o problema..."
+              placeholder={i18n.t("manutencao.form.descPlaceholder")}
               placeholderTextColor={colors.subtext}
               style={[styles.descricao, { color: colors.text }]}
             />
             <TouchableOpacity style={styles.botao} onPress={salvarManutencao}>
               <Text style={[styles.botaoTexto, { color: colors.background }]}>
-                Cadastrar
+                {i18n.t("manutencao.form.button")}
               </Text>
             </TouchableOpacity>
             <Text style={[styles.historico, { color: colors.text }]}>
-              Histórico
+              {i18n.t("manutencao.history.title")}
             </Text>
 
             {manutencoes.length === 0 && (
               <Text style={{ color: colors.subtext, marginTop: 10 }}>
-                Nenhuma manutenção registrada
+                {i18n.t("manutencao.history.empty")}
               </Text>
             )}
           </View>
@@ -422,12 +484,12 @@ export default function ManutencaoScreen() {
               <Ionicons name="close" size={24} color="#888" />
             </TouchableOpacity>
             <Text style={[styles.modalTitle, { color: colors.text }]}>
-              Detalhes da Manutenção
+              {i18n.t("manutencao.modal.title")}
             </Text>
             <View style={[styles.info, { backgroundColor: colors.background }]}>
               <View style={styles.desc}>
                 <Text style={[styles.labelInfo, { color: colors.text }]}>
-                  Data:
+                  {i18n.t("manutencao.modal.date")}
                 </Text>
                 <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                   {manutencaoSelecionada?.data
@@ -439,7 +501,7 @@ export default function ManutencaoScreen() {
               </View>
               <View style={styles.desc}>
                 <Text style={[styles.labelInfo, { color: colors.text }]}>
-                  Moto (Placa):
+                  {i18n.t("manutencao.modal.moto")}
                 </Text>
                 <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                   {manutencaoSelecionada?.placa}
@@ -447,7 +509,7 @@ export default function ManutencaoScreen() {
               </View>
               <View style={styles.desc}>
                 <Text style={[styles.labelInfo, { color: colors.text }]}>
-                  Problemas:
+                  {i18n.t("manutencao.modal.problema")}
                 </Text>
                 <Text style={[styles.inputInfo, { color: colors.subtext }]}>
                   {manutencaoSelecionada?.problemas}
@@ -460,12 +522,12 @@ export default function ManutencaoScreen() {
                   <Text
                     style={[styles.confirmar, { color: colors.background }]}
                   >
-                    Concluir Manutenção
+                    {i18n.t("manutencao.modal.buttonConcluir")}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={excluirManutencao}>
                   <Text style={[styles.excluir, { color: colors.background }]}>
-                    Excluir Manutenção
+                    {i18n.t("manutencao.modal.buttonExcluir")}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -488,8 +550,8 @@ export default function ManutencaoScreen() {
                   }}
                 >
                   {manutencaoSelecionada?.status === "Concluida"
-                    ? "Esta manutenção foi concluída!"
-                    : "Esta manutenção foi excluída!"}
+                    ? i18n.t("manutencao.modal.statusConcluida")
+                    : i18n.t("manutencao.modal.statusExcluida")}
                 </Text>
                 <Ionicons
                   name={
