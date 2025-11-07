@@ -20,7 +20,8 @@
         "foregroundImage": "./assets/images/mottu-logo.png",
         "backgroundColor": "transparent"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "useNextNotificationsApi": true
     },
     "web": {
       "bundler": "metro",
@@ -37,7 +38,9 @@
           "resizeMode": "contain",
           "backgroundColor": "#00B131"
         }
-      ]
+      ],
+      "expo-notifications",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true

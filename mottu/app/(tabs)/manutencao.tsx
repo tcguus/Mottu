@@ -18,6 +18,7 @@ import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { rawColors } from "../../constants/theme";
 import { useTheme } from "../../context/ThemeContext";
+import * as Notifications from "expo-notifications";
 
 type ManutencaoStatus = "Aberta" | "Concluida" | "excluido";
 
@@ -125,6 +126,20 @@ export default function ManutencaoScreen() {
     };
     try {
       await api.post("/Manutencoes", novaManutencao);
+
+      
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Manutenção Agendada! 🏍️",
+          body: `A manutenção para a moto ${motoSelecionada} foi registrada com sucesso.`,
+        },
+        trigger: {
+          seconds: 2,
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        }, 
+      });
+     
+
       setMotoSelecionada(null);
       setTipo(null);
       setDescricao("");
