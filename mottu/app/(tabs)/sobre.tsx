@@ -11,7 +11,7 @@ import { useAppSettings } from "../../context/AppSettingsContext";
 import { Ionicons } from "@expo/vector-icons";
 import i18n from "@/services/i18n";
 
-const COMMIT_HASH = "5c2b781d";
+const COMMIT_HASH = "84ce7b0";
 
 export default function SobreScreen() {
   const { colors } = useAppSettings();

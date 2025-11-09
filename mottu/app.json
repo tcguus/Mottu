@@ -6,22 +6,30 @@
     "orientation": "portrait",
     "icon": "./assets/images/mottu-logo.png",
     "scheme": "mottu",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
         "UIStatusBarHidden": true,
         "UIViewControllerBasedStatusBarAppearance": false
-      }
+      },
+      "bundleIdentifier": "com.tcguus.mottu"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/mottu-logo.png",
-        "backgroundColor": "transparent"
+        "backgroundColor": "#00B131"
       },
+      "package": "com.tcguus.mottu",
+      "versionCode": 1,
       "edgeToEdgeEnabled": true,
-      "useNextNotificationsApi": true
+      "useNextNotificationsApi": true,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDZ5vx6MefKhbGE3C8-vZMwtAGZUVSSozY"
+        }
+      }
     },
     "web": {
       "bundler": "metro",
@@ -33,7 +41,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "../assets/images/mottu-logo.png",
+          "image": "./assets/images/mottu-logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#00B131"
@@ -44,6 +52,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "bf144db0-92a7-4b3a-a4a2-f1abeb4e5aea"
+      }
     }
   }
 }
